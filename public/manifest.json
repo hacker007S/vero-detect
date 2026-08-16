@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "VeRO Detect",
+  "version": "1.0.0",
+  "description": "Checks AliExpress, eBay and Amazon products against eBay VeRO and UK restricted-item rules before you list them.",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": [
+    "https://*.ebay.co.uk/*",
+    "https://raw.githubusercontent.com/*",
+    "https://api.anthropic.com/*"
+  ],
+  "background": { "service_worker": "worker.js", "type": "module" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.ebay.co.uk/itm/*",
+        "https://www.ebay.com/itm/*",
+        "https://*.aliexpress.com/item/*",
+        "https://*.aliexpress.us/item/*",
+        "https://www.amazon.co.uk/*",
+        "https://www.amazon.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options.html"
+}
