@@ -37,7 +37,12 @@ export function containsPhrase(textTokens: string[], phrase: string): boolean {
 
 export function brandMatchTerm(name: string): string {
   const words = tokens(name).filter((w) => !GENERIC.has(w));
-  while (words.length > 1 && SUFFIXES.has(words[words.length - 1])) words.pop();
+  while (
+    words.length > 1 &&
+    (SUFFIXES.has(words[words.length - 1]) || words[words.length - 1].length === 1)
+  ) {
+    words.pop();
+  }
   if (words.length === 1 && (SUFFIXES.has(words[0]) || GENERIC.has(words[0]))) return '';
   const term = words.join(' ');
   if (term.length < 2) return '';
