@@ -113,8 +113,8 @@ const CSS = `
 .cat-row.has-hits { cursor: pointer; }
 .cat-row.has-hits:hover { background: rgba(255,255,255,0.05); }
 .cat-head { display: flex; align-items: center; gap: 10px; padding: 9px 9px; }
-.cat-head .status { font-size: 15px; width: 20px; text-align: center; flex: none; }
-.cat-head .icon { font-size: 15px; width: 20px; text-align: center; flex: none; opacity: 0.85; }
+.cat-head .status { font-size: 14px; width: 18px; text-align: center; flex: none; margin-left: 2px; }
+.cat-head .icon { font-size: 16px; width: 22px; text-align: center; flex: none; }
 .cat-head .name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
 .cat-head .note { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 .chip {
@@ -277,13 +277,13 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
 
     const statusEmoji = { clear: '✅', caution: '⚠️', danger: '❌', unknown: '❔' }[cat.level];
     const head = el('div', 'cat-head');
-    head.appendChild(el('span', 'status', statusEmoji));
     head.appendChild(el('span', 'icon', meta.icon));
     const nameWrap = el('div');
     nameWrap.appendChild(el('div', 'name', meta.name));
     if (cat.note) nameWrap.appendChild(el('div', 'note', cat.note));
     head.appendChild(nameWrap);
     head.appendChild(el('span', 'chip', cat.hits.length ? `${lm.chip} · ${cat.hits.length}` : lm.chip));
+    head.appendChild(el('span', 'status', statusEmoji));
     if (cat.hits.length) head.appendChild(el('span', 'caret', '▶'));
     row.appendChild(head);
 
