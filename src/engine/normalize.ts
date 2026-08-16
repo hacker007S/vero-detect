@@ -2,6 +2,8 @@ const SUFFIXES = new Set([
   'inc', 'ltd', 'llc', 'gmbh', 'co', 'company', 'corp', 'corporation', 'spa',
   'plc', 'limited', 'group', 'holdings', 'international', 'intl', 'sa', 'ag',
   'bv', 'srl', 'kg', 'uk', 'usa', 'brands', 'industries', 'enterprises',
+  'technology', 'technologies', 'systems', 'products', 'america', 'europe',
+  'global', 'worldwide', 'licensing', 'trademark', 'trademarks',
 ]);
 const GENERIC = new Set([
   'the', 'a', 'an', 'it', 'one', 'all', 'pro', 'plus', 'home', 'life', 'best',
