@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildAnthropicBody, buildGeminiBody, buildOpenAIBody,
-  extractResponseText, parseDeepCheckResponse, MODELS,
+  extractResponseText, parseDeepCheckResponse, pickGeminiModel, MODELS,
 } from '../../src/worker/ai';
 import type { Listing } from '../../src/types';
 
@@ -60,6 +60,33 @@ describe('extractResponseText', () => {
     expect(
       extractResponseText('gemini', { candidates: [{ content: { parts: [{ text: 'C' }] } }] }),
     ).toBe('C');
+  });
+});
+
+describe('pickGeminiModel', () => {
+  const gc = ['generateContent'];
+  it('prefers newest plain flash over flash-lite and older versions', () => {
+    expect(
+      pickGeminiModel([
+        { name: 'models/gemini-2.5-flash', supportedGenerationMethods: gc },
+        { name: 'models/gemini-3.5-flash', supportedGenerationMethods: gc },
+        { name: 'models/gemini-3.1-flash-lite', supportedGenerationMethods: gc },
+        { name: 'models/gemini-3.1-pro', supportedGenerationMethods: gc },
+      ]),
+    ).toBe('gemini-3.5-flash');
+  });
+  it('skips image/preview/embedding variants and non-generateContent models', () => {
+    expect(
+      pickGeminiModel([
+        { name: 'models/gemini-3.1-flash-image', supportedGenerationMethods: gc },
+        { name: 'models/gemini-3-flash-preview', supportedGenerationMethods: gc },
+        { name: 'models/gemini-embedding-001', supportedGenerationMethods: ['embedContent'] },
+        { name: 'models/gemini-2.5-flash-lite', supportedGenerationMethods: gc },
+      ]),
+    ).toBe('gemini-2.5-flash-lite');
+  });
+  it('returns null when nothing usable exists', () => {
+    expect(pickGeminiModel([{ name: 'models/gemini-3.1-pro', supportedGenerationMethods: gc }])).toBeNull();
   });
 });
 

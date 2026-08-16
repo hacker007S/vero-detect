@@ -111,6 +111,47 @@ export function extractResponseText(provider: Provider, data: unknown): string {
     .join('');
 }
 
+export interface GeminiModelInfo {
+  name: string; // e.g. "models/gemini-2.5-flash"
+  supportedGenerationMethods?: string[];
+}
+
+/**
+ * Pick the best Gemini model for deep checks from the live ListModels response.
+ * Google renames/retires model IDs often, so we never trust a hardcoded one.
+ * Preference: supports generateContent, is a "flash" text model (cheap/free tier),
+ * not a preview/specialised variant, highest version number; flash beats flash-lite.
+ */
+export function pickGeminiModel(models: GeminiModelInfo[]): string | null {
+  const candidates = models
+    .map((m) => m.name.replace(/^models\//, ''))
+    .filter((_, i) =>
+      (models[i].supportedGenerationMethods ?? ['generateContent']).includes('generateContent'),
+    )
+    .filter((n) => n.includes('flash'))
+    .filter((n) => !/(image|live|audio|tts|embedding|thinking|exp|preview)/.test(n));
+  if (candidates.length === 0) return null;
+  const version = (n: string) => Number((n.match(/gemini-(\d+(?:\.\d+)?)/) ?? [])[1] ?? 0);
+  candidates.sort((a, b) => {
+    const lite = Number(a.includes('lite')) - Number(b.includes('lite'));
+    if (lite !== 0) return lite; // plain flash before flash-lite
+    return version(b) - version(a); // newest first
+  });
+  return candidates[0];
+}
+
+async function discoverGeminiModel(apiKey: string): Promise<string> {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(apiKey)}`,
+  );
+  if (!res.ok) throw new Error(`gemini ListModels ${res.status}`);
+  const data = await res.json();
+  const model = pickGeminiModel((data.models ?? []) as GeminiModelInfo[]);
+  if (!model) throw new Error('gemini: no usable flash model on this key');
+  await chrome.storage.local.set({ geminiModel: model });
+  return model;
+}
+
 async function fetchImageBase64(url: string): Promise<{ mimeType: string; data: string } | null> {
   try {
     const res = await fetch(url);
@@ -154,8 +195,23 @@ export async function deepCheck(
     const images = (
       await Promise.all(listing.images.slice(0, 3).map(fetchImageBase64))
     ).filter((i): i is { mimeType: string; data: string } => i !== null);
-    url = `https://generativelanguage.googleapis.com/v1beta/models/${MODELS.gemini}:generateContent?key=${encodeURIComponent(apiKey)}`;
     body = buildGeminiBody(listing, images);
+
+    // model IDs churn — use the cached discovered model, re-discover on 404
+    const cached = (await chrome.storage.local.get('geminiModel')).geminiModel as string | undefined;
+    let model = cached ?? (await discoverGeminiModel(apiKey));
+    const call = (m: string) =>
+      fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        { method: 'POST', headers, body: JSON.stringify(body) },
+      );
+    let res = await call(model);
+    if (res.status === 404 || res.status === 400) {
+      model = await discoverGeminiModel(apiKey);
+      res = await call(model);
+    }
+    if (!res.ok) throw new Error(`gemini API ${res.status} (model ${model})`);
+    return parseDeepCheckResponse(extractResponseText('gemini', await res.json()));
   }
 
   const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
