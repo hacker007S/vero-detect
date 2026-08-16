@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buildRequestBody, parseDeepCheckResponse } from '../../src/worker/ai';
+import {
+  buildAnthropicBody, buildGeminiBody, buildOpenAIBody,
+  extractResponseText, parseDeepCheckResponse, MODELS,
+} from '../../src/worker/ai';
 import type { Listing } from '../../src/types';
 
 const listing: Listing = {
@@ -9,13 +12,13 @@ const listing: Listing = {
   missing: [],
 };
 
-describe('buildRequestBody', () => {
-  const body = buildRequestBody(listing) as {
+describe('buildAnthropicBody', () => {
+  const body = buildAnthropicBody(listing) as {
     model: string;
     messages: { content: { type: string; text?: string; source?: { type: string; url: string } }[] }[];
   };
   it('uses the pinned model and caps images at 3', () => {
-    expect(body.model).toBe('claude-haiku-4-5-20251001');
+    expect(body.model).toBe(MODELS.anthropic);
     const imgs = body.messages[0].content.filter((c) => c.type === 'image');
     expect(imgs).toHaveLength(3);
     expect(imgs[0].source).toEqual({ type: 'url', url: 'https://img/1.jpg' });
@@ -23,6 +26,40 @@ describe('buildRequestBody', () => {
   it('includes the title in the prompt text', () => {
     const text = body.messages[0].content.find((c) => c.type === 'text')!.text!;
     expect(text).toContain('Cool watch');
+  });
+});
+
+describe('buildOpenAIBody', () => {
+  it('uses image_url parts, capped at 3', () => {
+    const body = buildOpenAIBody(listing) as {
+      model: string;
+      messages: { content: { type: string; image_url?: { url: string } }[] }[];
+    };
+    expect(body.model).toBe(MODELS.openai);
+    const imgs = body.messages[0].content.filter((c) => c.type === 'image_url');
+    expect(imgs).toHaveLength(3);
+    expect(imgs[0].image_url).toEqual({ url: 'https://img/1.jpg' });
+  });
+});
+
+describe('buildGeminiBody', () => {
+  it('uses inline base64 image parts', () => {
+    const body = buildGeminiBody(listing, [{ mimeType: 'image/jpeg', data: 'QUJD' }]) as {
+      contents: { parts: Record<string, unknown>[] }[];
+    };
+    const parts = body.contents[0].parts;
+    expect(parts[0]).toHaveProperty('text');
+    expect(parts[1]).toEqual({ inline_data: { mime_type: 'image/jpeg', data: 'QUJD' } });
+  });
+});
+
+describe('extractResponseText', () => {
+  it('reads each provider response shape', () => {
+    expect(extractResponseText('anthropic', { content: [{ type: 'text', text: 'A' }] })).toBe('A');
+    expect(extractResponseText('openai', { choices: [{ message: { content: 'B' } }] })).toBe('B');
+    expect(
+      extractResponseText('gemini', { candidates: [{ content: { parts: [{ text: 'C' }] } }] }),
+    ).toBe('C');
   });
 });
 

@@ -73,12 +73,15 @@ chrome.runtime.onMessage.addListener((msg: WorkerRequest, _sender, sendResponse)
       }
       case 'deep-check': {
         const settings = (await store<Settings>('settings')) ?? {};
-        if (!settings.apiKey) {
+        const provider = settings.provider ?? 'anthropic';
+        // legacy v1.0.x stored a single anthropic key in settings.apiKey
+        const key = settings.keys?.[provider] ?? (provider === 'anthropic' ? settings.apiKey : undefined);
+        if (!key) {
           sendResponse({ error: 'no-key' });
           break;
         }
         try {
-          sendResponse({ result: await deepCheck(msg.listing, settings.apiKey) });
+          sendResponse({ result: await deepCheck(msg.listing, provider, key) });
         } catch (e) {
           sendResponse({ error: String(e) });
         }

@@ -4,7 +4,13 @@ export interface HistoryEntry {
   url: string; site: string; title: string; overall: Level;
   firedRuleIds: string[]; at: number;
 }
-export interface Settings { apiKey?: string; curatedUrl?: string; }
+export interface Settings {
+  /** legacy field from v1.0.x — migrated to keys.anthropic */
+  apiKey?: string;
+  curatedUrl?: string;
+  provider?: 'anthropic' | 'openai' | 'gemini';
+  keys?: { anthropic?: string; openai?: string; gemini?: string };
+}
 export interface RulesStatus {
   officialCount: number; officialFetchedAt: number;
   curatedVersion: string; usingRemoteCurated: boolean;

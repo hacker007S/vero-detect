@@ -47,15 +47,33 @@ async function refreshStatus(): Promise<void> {
 
 async function init(): Promise<void> {
   const { settings, overrides } = await loadStores();
-  $<HTMLInputElement>('api-key').value = settings.apiKey ?? '';
+  // migrate legacy v1.0.x single anthropic key
+  const keys = { ...settings.keys };
+  if (settings.apiKey && !keys.anthropic) keys.anthropic = settings.apiKey;
+  $<HTMLSelectElement>('provider').value = settings.provider ?? 'gemini';
+  $<HTMLInputElement>('key-gemini').value = keys.gemini ?? '';
+  $<HTMLInputElement>('key-anthropic').value = keys.anthropic ?? '';
+  $<HTMLInputElement>('key-openai').value = keys.openai ?? '';
   $<HTMLInputElement>('curated-url').value = settings.curatedUrl ?? '';
   $<HTMLTextAreaElement>('add-brands').value = (overrides.addBrands ?? []).join('\n');
   $<HTMLTextAreaElement>('ignore-brands').value = (overrides.ignoreBrands ?? []).join('\n');
   await refreshStatus();
 
-  $<HTMLInputElement>('api-key').addEventListener('change', (e) =>
-    void saveSettings({ apiKey: (e.target as HTMLInputElement).value.trim() || undefined }),
-  );
+  const saveKeys = async (): Promise<void> => {
+    await saveSettings({
+      provider: $<HTMLSelectElement>('provider').value as Settings['provider'],
+      keys: {
+        gemini: $<HTMLInputElement>('key-gemini').value.trim() || undefined,
+        anthropic: $<HTMLInputElement>('key-anthropic').value.trim() || undefined,
+        openai: $<HTMLInputElement>('key-openai').value.trim() || undefined,
+      },
+      apiKey: undefined, // clear the legacy field once migrated
+    });
+  };
+  $('provider').addEventListener('change', () => void saveKeys());
+  $('key-gemini').addEventListener('change', () => void saveKeys());
+  $('key-anthropic').addEventListener('change', () => void saveKeys());
+  $('key-openai').addEventListener('change', () => void saveKeys());
   $<HTMLInputElement>('curated-url').addEventListener('change', (e) =>
     void saveSettings({ curatedUrl: (e.target as HTMLInputElement).value.trim() || undefined }),
   );

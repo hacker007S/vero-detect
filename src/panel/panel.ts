@@ -288,7 +288,7 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
         if ('error' in res) {
           result.textContent =
             res.error === 'no-key'
-              ? 'Add your own Anthropic API key in Options to enable deep checks (optional).'
+              ? 'Add an AI key in Options to enable deep checks (optional — Google Gemini has a free tier).'
               : `Deep check failed (${res.error}) — the rules verdict above still stands.`;
         } else {
           const lm = LEVEL_META[(res.recommendation as Level) in LEVEL_META ? (res.recommendation as Level) : 'caution'];
