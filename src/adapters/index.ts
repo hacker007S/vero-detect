@@ -1,5 +1,7 @@
 import type { Listing, Site } from '../types';
 import { ebayAdapter } from './ebay';
+import { aliexpressAdapter } from './aliexpress';
+import { amazonAdapter } from './amazon';
 
 export interface Adapter {
   site: Site;
@@ -7,7 +9,7 @@ export interface Adapter {
   extract(doc: Document, url: string): Listing;
 }
 
-const adapters: Adapter[] = [ebayAdapter];
+const adapters: Adapter[] = [ebayAdapter, aliexpressAdapter, amazonAdapter];
 
 export function registerAdapter(a: Adapter): void {
   adapters.push(a);
