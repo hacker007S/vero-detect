@@ -15,12 +15,25 @@ export function editDistance(a: string, b: string): number {
   return d[m][n];
 }
 
+// Frequent product-listing words that must never fuzzy-match a brand name
+// (e.g. "design" is 1 edit from the brand "mDesign").
+const COMMON = new Set([
+  'design', 'designs', 'glass', 'steel', 'water', 'power', 'clean', 'cover',
+  'covers', 'light', 'lights', 'white', 'black', 'green', 'small', 'large',
+  'style', 'smart', 'fresh', 'house', 'home', 'kitchen', 'garden', 'travel',
+  'sport', 'sports', 'classic', 'premium', 'quality', 'filter', 'filters',
+  'holder', 'stand', 'strong', 'super', 'ultra', 'micro', 'plus', 'model',
+  'brand', 'pack', 'packs', 'piece', 'pieces', 'family', 'medion', 'series',
+]);
+
 export function fuzzyIncludes(textTokens: string[], term: string): boolean {
   if (term.includes(' ') || term.length < 5) return false;
   const max = term.length >= 8 ? 2 : 1;
   return textTokens.some(
     (t) =>
       t.length >= 5 &&
+      t[0] === term[0] && // typos rarely change the first letter; kills common-word collisions
+      !COMMON.has(t) &&
       Math.abs(t.length - term.length) <= max &&
       t !== term &&
       editDistance(t, term) <= max,
