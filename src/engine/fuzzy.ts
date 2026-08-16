@@ -1,3 +1,5 @@
+import englishWords from '../rules/bundled/english-words.json';
+
 export function editDistance(a: string, b: string): number {
   const m = a.length, n = b.length;
   const d: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
@@ -15,16 +17,10 @@ export function editDistance(a: string, b: string): number {
   return d[m][n];
 }
 
-// Frequent product-listing words that must never fuzzy-match a brand name
-// (e.g. "design" is 1 edit from the brand "mDesign").
-const COMMON = new Set([
-  'design', 'designs', 'glass', 'steel', 'water', 'power', 'clean', 'cover',
-  'covers', 'light', 'lights', 'white', 'black', 'green', 'small', 'large',
-  'style', 'smart', 'fresh', 'house', 'home', 'kitchen', 'garden', 'travel',
-  'sport', 'sports', 'classic', 'premium', 'quality', 'filter', 'filters',
-  'holder', 'stand', 'strong', 'super', 'ultra', 'micro', 'plus', 'model',
-  'brand', 'pack', 'packs', 'piece', 'pieces', 'family', 'medion', 'series',
-]);
+// A token that is a genuine English word is never a "typo" of a brand name —
+// this is what stops "Spring" flagging Sprint and "design" flagging mDesign.
+// Real typos ("dysson") are not dictionary words, so detection is unaffected.
+const DICTIONARY = new Set<string>(englishWords as string[]);
 
 export function fuzzyIncludes(textTokens: string[], term: string): boolean {
   if (term.includes(' ') || term.length < 5) return false;
@@ -32,8 +28,8 @@ export function fuzzyIncludes(textTokens: string[], term: string): boolean {
   return textTokens.some(
     (t) =>
       t.length >= 5 &&
-      t[0] === term[0] && // typos rarely change the first letter; kills common-word collisions
-      !COMMON.has(t) &&
+      t[0] === term[0] && // typos rarely change the first letter
+      !DICTIONARY.has(t) &&
       Math.abs(t.length - term.length) <= max &&
       t !== term &&
       editDistance(t, term) <= max,

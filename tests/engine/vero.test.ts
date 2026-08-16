@@ -32,6 +32,14 @@ describe('checkVero', () => {
     const r = checkVero(listing('Dysson cordless vacuum spare part'), pack);
     expect(r.level).toBe('danger');
   });
+  it('is clear for the trailer number plate clips listing (Sprint regression)', () => {
+    const r = checkVero(
+      listing('Pair Trailer Number Plate Clips Spring Loaded Steel Licence Holder Brackets'),
+      pack,
+    );
+    expect(r.level).toBe('clear');
+    expect(r.hits).toEqual([]);
+  });
   it('is clear for unbranded items', () => {
     const r = checkVero(listing('Strimmer Spool Line 1.65mm 15m Refill'), pack);
     expect(r.level).toBe('clear');

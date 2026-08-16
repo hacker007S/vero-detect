@@ -22,4 +22,9 @@ describe('fuzzyIncludes', () => {
   it('does not fire on unrelated words', () => {
     expect(fuzzyIncludes(tokens('kitchen season spoon'), 'dyson')).toBe(false);
   });
+  it('never treats genuine English words as brand typos', () => {
+    expect(fuzzyIncludes(tokens('spring loaded steel clips'), 'sprint')).toBe(false); // Sprint Corp
+    expect(fuzzyIncludes(tokens('modern design lamp'), 'mdesign')).toBe(false);
+    expect(fuzzyIncludes(tokens('print your photos'), 'sprint')).toBe(false);
+  });
 });
