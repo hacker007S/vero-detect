@@ -24,6 +24,9 @@ describe('renderPanel', () => {
     const sr = host.shadowRoot!;
     expect(sr.querySelector('.badge')!.textContent).toMatch(/DO NOT LIST/i);
     expect(sr.querySelectorAll('.cat-row')).toHaveLength(6);
+    expect(sr.querySelector('.cat-row[data-cat="vero"] .status')!.textContent).toBe('❌');
+    expect(sr.querySelector('.cat-row[data-cat="prohibited"] .status')!.textContent).toBe('✅');
+    expect(sr.querySelector('.cat-row[data-cat="size"] .status')!.textContent).toBe('❔');
     expect(sr.textContent).toMatch(/Partial check/);
     expect(sr.textContent).toMatch(/not a guarantee/i);
   });

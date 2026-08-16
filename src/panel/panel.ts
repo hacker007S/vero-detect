@@ -113,7 +113,8 @@ const CSS = `
 .cat-row.has-hits { cursor: pointer; }
 .cat-row.has-hits:hover { background: rgba(255,255,255,0.05); }
 .cat-head { display: flex; align-items: center; gap: 10px; padding: 9px 9px; }
-.cat-head .icon { font-size: 16px; width: 22px; text-align: center; flex: none; }
+.cat-head .status { font-size: 15px; width: 20px; text-align: center; flex: none; }
+.cat-head .icon { font-size: 15px; width: 20px; text-align: center; flex: none; opacity: 0.85; }
 .cat-head .name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
 .cat-head .note { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 .chip {
@@ -155,11 +156,36 @@ const CSS = `
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .deep .result {
-  margin-top: 8px; padding: 10px 12px; border-radius: 10px; font-size: 12px;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  line-height: 1.5; color: #d1d5db;
+  margin-top: 8px; padding: 12px 13px; border-radius: 12px; font-size: 12px;
+  background: color-mix(in srgb, var(--rv, #9ca3af) 7%, rgba(255,255,255,0.03));
+  border: 1px solid color-mix(in srgb, var(--rv, #9ca3af) 35%, transparent);
+  line-height: 1.55; color: #d1d5db;
+  animation: resultIn 0.28s cubic-bezier(0.32,0.72,0,1);
 }
-.deep .result .rec { font-weight: 800; letter-spacing: 0.03em; }
+@keyframes resultIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.deep .rec-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.deep .rec-emoji { font-size: 17px; line-height: 1; }
+.deep .rec-tag {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 0.12em; color: #94a3b8;
+  text-transform: uppercase;
+}
+.deep .rec {
+  font-weight: 800; letter-spacing: 0.04em; font-size: 13px; color: var(--rv);
+  margin-left: auto; padding: 2px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--rv) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rv) 45%, transparent);
+}
+.deep .reason {
+  color: #cbd5e1; padding: 7px 10px; border-radius: 8px; margin-bottom: 4px;
+  background: rgba(255,255,255,0.04);
+  border-left: 3px solid color-mix(in srgb, var(--rv) 70%, transparent);
+}
+.deep .note {
+  display: flex; gap: 8px; align-items: flex-start; margin-top: 6px;
+  padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.04);
+}
+.deep .note .n-emoji { flex: none; font-size: 12px; line-height: 1.5; }
+.deep .note .n-text { color: #d1d5db; }
 
 /* ---------- footer ---------- */
 .foot {
@@ -249,7 +275,9 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
     row.dataset.cat = cat.category;
     row.style.setProperty('--lv', lm.color);
 
+    const statusEmoji = { clear: '✅', caution: '⚠️', danger: '❌', unknown: '❔' }[cat.level];
     const head = el('div', 'cat-head');
+    head.appendChild(el('span', 'status', statusEmoji));
     head.appendChild(el('span', 'icon', meta.icon));
     const nameWrap = el('div');
     nameWrap.appendChild(el('div', 'name', meta.name));
@@ -291,12 +319,26 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
               ? 'Add an AI key in Options to enable deep checks (optional — Google Gemini has a free tier).'
               : `Deep check failed (${res.error}) — the rules verdict above still stands.`;
         } else {
-          const lm = LEVEL_META[(res.recommendation as Level) in LEVEL_META ? (res.recommendation as Level) : 'caution'];
-          const rec = el('div', 'rec', `AI: ${lm.word}`);
-          rec.style.color = lm.color;
-          result.appendChild(rec);
-          result.appendChild(el('div', undefined, res.reasoning));
-          for (const c of res.concerns) result.appendChild(el('div', undefined, `• ${c}`));
+          const level: Level =
+            (res.recommendation as Level) in LEVEL_META ? (res.recommendation as Level) : 'caution';
+          const lm = LEVEL_META[level];
+          const emoji = { danger: '🚨', caution: '⚠️', clear: '✅', unknown: '🔎' }[level];
+          const noteEmoji = { danger: '❌', caution: '🟡', clear: '✔️', unknown: '🔎' }[level];
+          result.style.setProperty('--rv', lm.color);
+
+          const row = el('div', 'rec-row');
+          row.appendChild(el('span', 'rec-emoji', emoji));
+          row.appendChild(el('span', 'rec-tag', 'AI deep check'));
+          row.appendChild(el('span', 'rec', lm.word));
+          result.appendChild(row);
+
+          if (res.reasoning) result.appendChild(el('div', 'reason', res.reasoning));
+          for (const c of res.concerns) {
+            const note = el('div', 'note');
+            note.appendChild(el('span', 'n-emoji', noteEmoji));
+            note.appendChild(el('span', 'n-text', c));
+            result.appendChild(note);
+          }
         }
       } catch (e) {
         result.textContent = `Deep check failed — the rules verdict above still stands.`;
