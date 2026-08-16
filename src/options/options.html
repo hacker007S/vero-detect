@@ -1,2 +1,144 @@
-<!doctype html><html><head><meta charset="utf-8"><title>VeRO Detect</title></head>
-<body><div id="app"></div><script src="options.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeRO Detect — Settings</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { color-scheme: dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: radial-gradient(1200px 700px at 15% -10%, #1e293b 0%, #0f172a 55%, #0b1020 100%);
+    min-height: 100vh; color: #e5e7eb; padding: 44px 20px 80px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 14px; margin-bottom: 30px; }
+  .logo {
+    width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center;
+    justify-content: center; font-size: 24px;
+    background: linear-gradient(135deg, rgba(52,211,153,0.25), rgba(59,130,246,0.25));
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  h1 { font-size: 21px; font-weight: 800; letter-spacing: 0.01em; }
+  header p { font-size: 12.5px; color: #94a3b8; margin-top: 3px; }
+  .card {
+    background: rgba(17, 24, 39, 0.72);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(14px) saturate(140%);
+    border-radius: 16px; padding: 20px 22px; margin-bottom: 18px;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.28);
+  }
+  .card h2 { font-size: 14.5px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .card .desc { font-size: 12px; color: #94a3b8; margin-bottom: 14px; line-height: 1.55; }
+  label { display: block; font-size: 11.5px; font-weight: 600; color: #cbd5e1; margin: 10px 0 5px; }
+  input[type="text"], input[type="password"], textarea {
+    width: 100%; background: rgba(2, 6, 23, 0.6); color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 10px;
+    padding: 9px 12px; font-size: 13px; font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  textarea { min-height: 84px; resize: vertical; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  input:focus, textarea:focus { outline: none; border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,0.18); }
+  button {
+    border: 1px solid rgba(147,197,253,0.4); background: rgba(59,130,246,0.16); color: #93c5fd;
+    padding: 8px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    transition: background 0.15s ease, transform 0.12s ease; margin-top: 12px;
+  }
+  button:hover { background: rgba(59,130,246,0.28); transform: translateY(-1px); }
+  button.subtle { border-color: rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #cbd5e1; }
+  button.danger { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.12); color: #fca5a5; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .stat { display: flex; gap: 22px; margin: 6px 0 2px; flex-wrap: wrap; }
+  .stat div { font-size: 12px; color: #94a3b8; }
+  .stat b { display: block; font-size: 19px; color: #f1f5f9; font-weight: 800; margin-bottom: 1px; }
+  .pill {
+    display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 9px;
+    border-radius: 999px; letter-spacing: 0.03em;
+  }
+  .pill.on { color: #34d399; background: rgba(52,211,153,0.13); border: 1px solid rgba(52,211,153,0.4); }
+  .pill.off { color: #94a3b8; background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.3); }
+  #toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(70px);
+    background: rgba(52,211,153,0.16); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.45);
+    padding: 9px 20px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+    transition: transform 0.25s cubic-bezier(0.32,0.72,0,1); pointer-events: none;
+    backdrop-filter: blur(10px);
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+  footer { text-align: center; font-size: 11px; color: #64748b; margin-top: 26px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🛡️</div>
+    <div>
+      <h1>VeRO Detect</h1>
+      <p>Listing safety checks for eBay dropshipping — settings</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>📚 Rules status</h2>
+    <p class="desc">The official VeRO list is re-scraped from eBay UK weekly; the team pack refreshes daily. Both fall back to the built-in copy.</p>
+    <div class="stat">
+      <div><b id="official-count">–</b>official VeRO brands</div>
+      <div><b id="official-age">–</b>list age</div>
+      <div><b id="curated-version">–</b>rules version <span id="curated-remote" class="pill off">BUILT-IN</span></div>
+    </div>
+    <button id="refresh">↻ Refresh now</button>
+  </div>
+
+  <div class="card">
+    <h2>🔬 Deep check (optional)</h2>
+    <p class="desc">Uses your own Anthropic API key to scan listing images for logos and implied brands. The free tool never requires one — leave blank to skip.</p>
+    <label for="api-key">Anthropic API key</label>
+    <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off">
+  </div>
+
+  <div class="card">
+    <h2>🌐 Team rules feed</h2>
+    <p class="desc">GitHub raw URL of the team curated pack. Members get rule updates automatically without reinstalling. Leave blank to use built-in rules.</p>
+    <label for="curated-url">Curated pack URL</label>
+    <input type="text" id="curated-url" placeholder="https://raw.githubusercontent.com/…/curated-pack.json">
+  </div>
+
+  <div class="card">
+    <h2>✏️ My overrides</h2>
+    <p class="desc">One brand per line. Additions are treated as VeRO enforcers; ignores mark a brand as confirmed safe for you only.</p>
+    <div class="grid2">
+      <div>
+        <label for="add-brands">Extra risky brands</label>
+        <textarea id="add-brands" placeholder="SomeBrand"></textarea>
+      </div>
+      <div>
+        <label for="ignore-brands">Ignore these brands</label>
+        <textarea id="ignore-brands" placeholder="Sage"></textarea>
+      </div>
+    </div>
+    <button id="save-overrides">Save overrides</button>
+  </div>
+
+  <div class="card">
+    <h2>🗂️ Check history</h2>
+    <p class="desc"><span id="history-count">0</span> checks logged locally. Export matches the hunt/pipeline.csv shape. Nothing ever leaves this machine.</p>
+    <div class="row">
+      <button id="export">⬇ Export CSV</button>
+      <button id="clear" class="danger">Clear history</button>
+    </div>
+  </div>
+
+  <footer>
+    VeRO Detect checks known rules only — a green result is not a guarantee.<br>
+    The official VeRO page is incomplete by design; the curated pack covers known unlisted enforcers.
+  </footer>
+</div>
+<div id="toast">Saved ✓</div>
+<script src="options.js"></script>
+</body>
+</html>
