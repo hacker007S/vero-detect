@@ -113,7 +113,10 @@ const CSS = `
 .cat-row.has-hits { cursor: pointer; }
 .cat-row.has-hits:hover { background: rgba(255,255,255,0.05); }
 .cat-head { display: flex; align-items: center; gap: 10px; padding: 9px 9px; }
-.cat-head .status { font-size: 14px; width: 18px; text-align: center; flex: none; margin-left: 2px; }
+.cat-head .status-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex: none; margin-left: 4px;
+  background: var(--lv); box-shadow: 0 0 7px color-mix(in srgb, var(--lv) 70%, transparent);
+}
 .cat-head .icon { font-size: 16px; width: 22px; text-align: center; flex: none; }
 .cat-head .name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
 .cat-head .note { font-size: 11px; color: #9ca3af; margin-top: 2px; }
@@ -275,7 +278,6 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
     row.dataset.cat = cat.category;
     row.style.setProperty('--lv', lm.color);
 
-    const statusEmoji = { clear: '✅', caution: '⚠️', danger: '❌', unknown: '❔' }[cat.level];
     const head = el('div', 'cat-head');
     head.appendChild(el('span', 'icon', meta.icon));
     const nameWrap = el('div');
@@ -283,7 +285,7 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
     if (cat.note) nameWrap.appendChild(el('div', 'note', cat.note));
     head.appendChild(nameWrap);
     head.appendChild(el('span', 'chip', cat.hits.length ? `${lm.chip} · ${cat.hits.length}` : lm.chip));
-    head.appendChild(el('span', 'status', statusEmoji));
+    head.appendChild(el('span', `status-dot lv-${cat.level}`));
     if (cat.hits.length) head.appendChild(el('span', 'caret', '▶'));
     row.appendChild(head);
 

@@ -24,9 +24,9 @@ describe('renderPanel', () => {
     const sr = host.shadowRoot!;
     expect(sr.querySelector('.badge')!.textContent).toMatch(/DO NOT LIST/i);
     expect(sr.querySelectorAll('.cat-row')).toHaveLength(6);
-    expect(sr.querySelector('.cat-row[data-cat="vero"] .status')!.textContent).toBe('❌');
-    expect(sr.querySelector('.cat-row[data-cat="prohibited"] .status')!.textContent).toBe('✅');
-    expect(sr.querySelector('.cat-row[data-cat="size"] .status')!.textContent).toBe('❔');
+    expect(sr.querySelector('.cat-row[data-cat="vero"] .status-dot')!.classList.contains('lv-danger')).toBe(true);
+    expect(sr.querySelector('.cat-row[data-cat="prohibited"] .status-dot')!.classList.contains('lv-clear')).toBe(true);
+    expect(sr.querySelector('.cat-row[data-cat="size"] .status-dot')!.classList.contains('lv-unknown')).toBe(true);
     expect(sr.textContent).toMatch(/Partial check/);
     expect(sr.textContent).toMatch(/not a guarantee/i);
   });
