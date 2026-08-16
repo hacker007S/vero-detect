@@ -26,6 +26,22 @@ Click the badge to open the full six-check panel: **VeRO brand · Prohibited/res
 Branded item · Size & weight · Sensitive item · Fragile**. Click any flagged row for
 details, what-to-do guidance, and the exact eBay policy link.
 
+## Get your free AI key (optional, 2 minutes)
+
+The rule checks are always free. If you also want the **🔬 Deep check** button
+(AI scans the listing images for brand logos), get your **own** free Google
+Gemini key — do not share keys, each key has its own free daily quota:
+
+1. Go to **aistudio.google.com** and sign in with any Google account
+2. Click **Get API key** → **Create API key** (no card needed)
+3. Copy the key (starts with `AIza…`)
+4. Right-click the VeRO Detect icon → **Options** → paste it under
+   **Gemini API key** (Gemini is already the selected provider)
+
+That's it — deep checks now cost you nothing within Google's free daily quota.
+(Claude and OpenAI keys also work if you prefer; they're paid but cost well
+under a penny per check.)
+
 ## Settings (right-click the extension icon → Options)
 
 - **Rules status** — the official VeRO list re-scrapes from eBay UK weekly and the team
