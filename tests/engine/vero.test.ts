@@ -28,9 +28,13 @@ describe('checkVero', () => {
     const r = checkVero(listing('Water Filter for Sage Barista Express'), pack);
     expect(r.hits.every((h) => h.level !== 'danger')).toBe(true);
   });
-  it('catches fuzzy misspellings', () => {
+  it('catches fuzzy misspellings of famous brands', () => {
     const r = checkVero(listing('Dysson cordless vacuum spare part'), pack);
     expect(r.level).toBe('danger');
+  });
+  it('never fuzzy-matches obscure VeRO brands (slicer vs Spicer Pro regression)', () => {
+    const r = checkVero(listing('Stainless Steel Meat Slicer Pro Kitchen Tool'), pack);
+    expect(r.hits.filter((h) => /spicer/i.test(h.label))).toEqual([]);
   });
   it('is clear for the trailer number plate clips listing (Sprint regression)', () => {
     const r = checkVero(

@@ -23,6 +23,7 @@ export function bundledPack(): RulesPack {
     version: curated.version,
     fetchedAt: 0,
     veroBrands: brands,
+    fuzzyBrands: curated.fuzzyBrands,
     aliases: curated.aliases as Record<string, string>,
     topBrands: curated.topBrands,
     classes: curated.classes as RulesPack['classes'],

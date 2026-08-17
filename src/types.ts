@@ -72,6 +72,8 @@ export interface RulesPack {
   version: string;
   fetchedAt: number;
   veroBrands: VeroBrand[];
+  /** famous brands eligible for fuzzy (misspelling) matching — obscure brands match exactly only */
+  fuzzyBrands: string[];
   aliases: Record<string, string>;
   topBrands: string[];
   classes: KeywordClass[];

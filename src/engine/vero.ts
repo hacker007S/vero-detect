@@ -65,9 +65,15 @@ export function checkVero(listing: Listing, pack: RulesPack): CategoryResult {
     });
   };
 
+  // fuzzy (misspelling) matching only applies to famous brands — counterfeiters
+  // misspell "Dyson", nobody misspells "Spicer Pro, LLC"; obscure brands were
+  // false-matching common product words (slicer → Spicer)
+  const fuzzyTerms = new Set(
+    pack.fuzzyBrands.map((n) => brandMatchTerm(n)).filter((t) => t !== ''),
+  );
   for (const { brand, term } of brandTerms(pack)) {
     if (containsPhrase(toks, term)) addHit(brand, term, false);
-    else if (fuzzyIncludes(toks, term)) addHit(brand, term, true);
+    else if (fuzzyTerms.has(term) && fuzzyIncludes(toks, term)) addHit(brand, term, true);
   }
 
   const brandByName = new Map(pack.veroBrands.map((b) => [b.name.toLowerCase(), b] as const));

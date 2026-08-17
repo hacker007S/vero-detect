@@ -7,6 +7,14 @@
     "Marvel", "Pokemon", "Hello Kitty", "Harry Potter", "Star Wars"
   ],
   "confirmedSafe": ["Sage", "Breville"],
+  "fuzzyBrands": [
+    "Dyson", "Nike", "Adidas", "Chanel", "Gucci", "Louis Vuitton", "Rolex",
+    "Apple", "Sony", "Samsung", "Disney", "LEGO", "Nintendo", "Pokemon",
+    "Makita", "Bose", "Dior", "Prada", "Burberry", "Hermes", "Cartier",
+    "Tiffany", "Ray-Ban", "Oakley", "Pandora", "Swarovski", "The North Face",
+    "UGG", "Crocs", "Puma", "Reebok", "New Balance", "Casio", "Seiko",
+    "Omega", "Barbie", "Hot Wheels", "Marvel", "GoPro", "Beats"
+  ],
   "aliases": {
     "iphone": "Apple", "ipad": "Apple", "macbook": "Apple", "airpods": "Apple",
     "magsafe": "Apple", "apple watch": "Apple", "imac": "Apple", "airtag": "Apple",

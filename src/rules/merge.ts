@@ -4,6 +4,7 @@ export interface LocalOverrides { addBrands?: string[]; ignoreBrands?: string[];
 
 interface CuratedShape {
   version: string; veroAdditions: string[]; confirmedSafe: string[];
+  fuzzyBrands?: string[];
   aliases: Record<string, string>; topBrands: string[];
   classes: RulesPack['classes']; size: RulesPack['size'];
 }
@@ -48,6 +49,7 @@ export function mergeRules(
     version: c?.version ?? bundled.version,
     fetchedAt: official?.fetchedAt ?? bundled.fetchedAt,
     veroBrands: brands,
+    fuzzyBrands: c?.fuzzyBrands ?? bundled.fuzzyBrands,
     aliases: c?.aliases ?? bundled.aliases,
     topBrands: c?.topBrands ?? bundled.topBrands,
     classes: c?.classes ?? bundled.classes,
