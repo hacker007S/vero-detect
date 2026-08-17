@@ -42,6 +42,11 @@ That's it — deep checks now cost you nothing within Google's free daily quota.
 (Claude and OpenAI keys also work if you prefer; they're paid but cost well
 under a penny per check.)
 
+**Power tip:** you can stack several free keys. Create a key in 2–3 different
+Google accounts (or projects), paste them all into the Gemini field separated
+by commas — the extension automatically switches to the next key whenever one
+hits its free limit, multiplying your free quota.
+
 ## Settings (right-click the extension icon → Options)
 
 - **Rules status** — the official VeRO list re-scrapes from eBay UK weekly and the team
