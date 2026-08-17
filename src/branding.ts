@@ -13,6 +13,6 @@ export const BRANDING = {
   upcoming: [
     { emoji: '🔎', name: 'Product Hunter', progress: 62 },
     { emoji: '📤', name: 'Auto Lister', progress: 38 },
-    { emoji: '📊', name: 'Profit Tracker', progress: 15 },
+    { emoji: '📊', name: 'Profit Tracker', progress: 62 },
   ],
 };
