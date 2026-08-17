@@ -48,6 +48,20 @@ describe('renderPanel', () => {
     renderPanel(host, verdict, { rulesAgeLabel: 'x', partial: false });
     expect(host.shadowRoot!.querySelectorAll('.badge')).toHaveLength(1);
   });
+  it('AI result restates rule flags so a CLEAR can never contradict the panel', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    renderPanel(host, verdict, {
+      rulesAgeLabel: 'x', partial: false,
+      onDeepCheck: async () => ({ recommendation: 'clear', reasoning: 'Generic item, no brands.', concerns: [] }),
+    });
+    const sr = host.shadowRoot!;
+    (sr.querySelector('.deep button') as HTMLElement).click();
+    await new Promise((r) => setTimeout(r, 10));
+    const result = sr.querySelector('.deep .result')!;
+    expect(result.textContent).toMatch(/rule checks still flag/i);
+    expect(result.textContent).toMatch(/Dyson Technology Limited/);
+  });
   it('escapes malicious listing text (renders as text, not markup)', () => {
     const host = document.createElement('div');
     document.body.appendChild(host);

@@ -22,6 +22,9 @@ Description: ${(l.description ?? '').slice(0, 800)}
 Check: (1) is a brand implied even without being named (trade dress, model names, lookalike design)?
 (2) is any brand logo or trademark visible in the images? (3) does the item fall in a restricted
 class (blade, weapon, medical, safety-critical, adult, battery)?
+(4) separately, note anything visible that makes it a POOR DROPSHIPPING choice — obviously large,
+heavy, fragile (glass/ceramic), or fit-dependent — add these to "concerns" prefixed with
+"Dropship note:" but do NOT let them change the recommendation, which is about compliance only.
 Reply with ONLY a JSON object: {"brand": string|null, "logoLikely": boolean,
 "concerns": string[], "recommendation": "clear"|"caution"|"danger", "reasoning": string}`;
 

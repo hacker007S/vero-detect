@@ -218,6 +218,14 @@ const CSS = `
 }
 .deep .note .n-emoji { flex: none; font-size: 12px; line-height: 1.5; }
 .deep .note .n-text { color: #d1d5db; }
+.deep .rule-notes {
+  margin-top: 9px; padding-top: 8px;
+  border-top: 1px dashed rgba(255,255,255,0.16);
+}
+.deep .rn-title {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #fbbf24; margin-bottom: 2px;
+}
 
 /* ---------- footer ---------- */
 .foot {
@@ -495,6 +503,22 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
             note.appendChild(el('span', 'n-emoji', noteEmoji));
             note.appendChild(el('span', 'n-text', c));
             result.appendChild(note);
+          }
+          // the AI answers the compliance question only — always restate what
+          // the rule checks flagged so the two can never appear to contradict
+          const ruleFlags = verdict.categories.flatMap((c) => c.hits);
+          if (ruleFlags.length) {
+            const rn = el('div', 'rule-notes');
+            rn.appendChild(
+              el('div', 'rn-title', '⚠ Note for dropshipping — rule checks still flag:'),
+            );
+            for (const flag of ruleFlags) {
+              const n = el('div', 'note');
+              n.appendChild(el('span', 'n-emoji', flag.level === 'danger' ? '❌' : '🟡'));
+              n.appendChild(el('span', 'n-text', `${flag.label} — ${flag.action ?? flag.detail}`));
+              rn.appendChild(n);
+            }
+            result.appendChild(rn);
           }
         }
       } catch (e) {
