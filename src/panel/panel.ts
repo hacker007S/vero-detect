@@ -198,35 +198,69 @@ const CSS = `
   font-size: 10.5px; color: #6b7280; line-height: 1.6;
 }
 .foot .age { color: #9ca3af; }
+/* ---------- brand card ---------- */
 .brand {
-  display: flex; align-items: flex-start; gap: 11px;
-  margin-top: 10px; padding: 10px 11px; border-radius: 12px;
-  background: linear-gradient(135deg, rgba(52,211,153,0.07), rgba(59,130,246,0.09));
-  border: 1px solid rgba(255,255,255,0.09);
+  margin-top: 10px; padding: 12px; border-radius: 14px;
+  background: linear-gradient(150deg, rgba(52,211,153,0.09), rgba(59,130,246,0.10));
+  border: 1px solid rgba(255,255,255,0.11);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
 }
+.brand .head { display: flex; align-items: center; gap: 10px; }
 .brand .mark-img {
-  width: 34px; height: 34px; border-radius: 9px; flex: none;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+  width: 38px; height: 38px; border-radius: 10px; flex: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
 }
-.brand .who { font-size: 10.5px; color: #94a3b8; line-height: 1.5; }
-.brand .who .line1 { font-size: 12px; margin-bottom: 1px; }
-.brand .who b { color: #f1f5f9; font-weight: 800; }
-.brand .who .grad {
+.brand .wordmark { font-size: 13.5px; font-weight: 800; color: #f1f5f9; line-height: 1.25; }
+.brand .wordmark .grad {
   background: linear-gradient(90deg, #34d399, #60a5fa);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  font-weight: 800;
 }
-.brand .who .cta { color: #93c5fd; margin-top: 3px; font-weight: 600; }
-.soon {
-  margin-top: 8px; text-align: center; font-size: 11px; font-weight: 800;
-  letter-spacing: 0.03em; padding: 6px 10px; border-radius: 999px;
-  border: 1px solid rgba(52, 211, 153, 0.3);
+.brand .co-chip {
+  margin-left: auto; flex: none; font-size: 9px; font-weight: 800;
+  letter-spacing: 0.14em; color: #0b1020; padding: 4px 10px; border-radius: 999px;
+  background: linear-gradient(90deg, #34d399, #60a5fa);
+  box-shadow: 0 2px 8px rgba(52,211,153,0.35);
+}
+.brand .pitch { font-size: 10.5px; color: #a7b3c5; line-height: 1.55; margin-top: 8px; }
+.brand .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
+.brand .chip-c {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 700; color: #cbd5e1; text-decoration: none;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+a.chip-c:hover { background: rgba(59,130,246,0.18); border-color: rgba(147,197,253,0.45); color: #bfdbfe; }
+
+/* ---------- upcoming products ---------- */
+.upcoming {
+  margin-top: 8px; padding: 11px 12px; border-radius: 14px;
+  background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.09);
+}
+.upcoming .up-title {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 0.14em; color: #94a3b8;
+  text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+}
+.upcoming .up-title .shine {
   background: linear-gradient(90deg, #34d399, #60a5fa, #34d399);
   background-size: 200% auto; -webkit-background-clip: text;
-  background-clip: text; color: transparent;
-  animation: shimmer 3s linear infinite;
+  background-clip: text; color: transparent; animation: shimmer 3s linear infinite;
 }
 @keyframes shimmer { to { background-position: 200% center; } }
+.up-item { margin-top: 9px; }
+.up-top { display: flex; align-items: baseline; font-size: 11px; font-weight: 700; color: #e2e8f0; }
+.up-top .up-pct { margin-left: auto; font-size: 10px; font-weight: 800; color: #93c5fd; }
+.up-bar {
+  height: 6px; border-radius: 999px; overflow: hidden; margin-top: 4px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.06);
+}
+.up-fill {
+  height: 100%; border-radius: 999px; width: 0;
+  background: linear-gradient(90deg, #34d399, #60a5fa);
+  box-shadow: 0 0 8px rgba(52,211,153,0.55);
+  transition: width 1s cubic-bezier(0.32,0.72,0,1);
+}
+.upcoming .stay { font-size: 10px; color: #7c8aa0; margin-top: 9px; text-align: center; font-weight: 600; }
 `;
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -388,23 +422,61 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
   foot.appendChild(
     el('div', undefined, 'Checks known rules only — a green result is not a guarantee.'),
   );
+  // brand card
   const brand = el('div', 'brand');
+  const head = el('div', 'head');
   const mark = document.createElement('img');
   mark.className = 'mark-img';
   mark.src = logoUrl;
   mark.alt = BRANDING.company;
-  brand.appendChild(mark);
-  const who = el('div', 'who');
-  const line1 = el('div', 'line1');
-  line1.appendChild(el('b', undefined, BRANDING.product));
-  line1.appendChild(document.createTextNode(' — '));
-  line1.appendChild(el('span', 'grad', BRANDING.tagline));
-  who.appendChild(line1);
-  who.appendChild(el('div', undefined, BRANDING.pitch));
-  who.appendChild(el('div', 'cta', BRANDING.cta));
-  brand.appendChild(who);
+  head.appendChild(mark);
+  const wordmark = el('div', 'wordmark');
+  wordmark.appendChild(document.createTextNode(BRANDING.product));
+  wordmark.appendChild(el('br'));
+  wordmark.appendChild(el('span', 'grad', BRANDING.tagline));
+  head.appendChild(wordmark);
+  head.appendChild(el('span', 'co-chip', BRANDING.company));
+  brand.appendChild(head);
+  brand.appendChild(el('div', 'pitch', BRANDING.pitch));
+  const chips = el('div', 'chips');
+  chips.appendChild(el('span', 'chip-c', `👤 ${BRANDING.owner}`));
+  const mail = document.createElement('a');
+  mail.className = 'chip-c';
+  mail.href = `mailto:${BRANDING.email}`;
+  mail.textContent = `📩 ${BRANDING.email}`;
+  chips.appendChild(mail);
+  if (BRANDING.phone) chips.appendChild(el('span', 'chip-c', `📞 ${BRANDING.phone}`));
+  brand.appendChild(chips);
   foot.appendChild(brand);
-  foot.appendChild(el('div', 'soon', `${BRANDING.comingSoon} — stay tuned!`));
+
+  // upcoming products with progress bars
+  const upcoming = el('div', 'upcoming');
+  const upTitle = el('div', 'up-title');
+  upTitle.appendChild(document.createTextNode('🚀'));
+  upTitle.appendChild(el('span', 'shine', 'Upcoming from Pycode'));
+  upcoming.appendChild(upTitle);
+  const fills: { node: HTMLElement; pct: number }[] = [];
+  for (const item of BRANDING.upcoming) {
+    const row = el('div', 'up-item');
+    const top = el('div', 'up-top');
+    top.appendChild(el('span', undefined, `${item.emoji} ${item.name}`));
+    top.appendChild(el('span', 'up-pct', `${item.progress}%`));
+    row.appendChild(top);
+    const bar = el('div', 'up-bar');
+    const fill = el('div', 'up-fill');
+    bar.appendChild(fill);
+    row.appendChild(bar);
+    upcoming.appendChild(row);
+    fills.push({ node: fill, pct: item.progress });
+  }
+  upcoming.appendChild(el('div', 'stay', 'Stay tuned — big things are coming ✨'));
+  foot.appendChild(upcoming);
+  // animate the bars in after paint
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      for (const f of fills) f.node.style.width = `${f.pct}%`;
+    }),
+  );
   card.appendChild(foot);
 
   // ----- badge -----
