@@ -5,11 +5,12 @@
 export const BRANDING = {
   product: 'VeRO Detect',
   owner: 'Zahoor Khan',
-  company: 'Z Trade Ltd',
-  email: 'khanzahoor301@gmail.com',
+  company: 'Pycode Ltd',
+  email: 'Zahoor@pycode.co.uk',
   phone: '', // e.g. '+44 7xxx xxxxxx' — leave empty to hide
   tagline: 'List smart. Stay safe.',
-  comingSoon: '🚀 Coming soon: Auto Listing — stay tuned!',
+  pitch: 'For any software automation — contact us.',
+  comingSoon: '🚀 Coming soon: Hunting · Listing · Profit & Loss tools — stay tuned!',
 };
 
 export function contactLine(): string {

@@ -391,6 +391,7 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
   who.appendChild(
     el('div', undefined, `by ${BRANDING.owner} · ${BRANDING.company}${contactLine() ? ' · ' + contactLine() : ''}`),
   );
+  who.appendChild(el('div', undefined, BRANDING.pitch));
   brand.appendChild(who);
   foot.appendChild(brand);
   foot.appendChild(el('div', 'soon', BRANDING.comingSoon));
