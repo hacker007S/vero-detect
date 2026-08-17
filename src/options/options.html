@@ -75,7 +75,8 @@
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 560px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
   footer { text-align: center; font-size: 11px; color: #64748b; margin-top: 26px; line-height: 1.6; }
 </style>
 </head>
@@ -110,8 +111,12 @@
       <option value="anthropic">Anthropic Claude (Haiku)</option>
       <option value="openai">OpenAI (GPT-4o-mini)</option>
     </select>
-    <label for="key-gemini">Gemini API key(s) — stack multiple free keys with commas, the extension rotates automatically when one hits its limit</label>
-    <input type="password" id="key-gemini" placeholder="AIza…, AIza…" autocomplete="off">
+    <label>Gemini API keys — add up to three free keys; the extension rotates automatically when one hits its limit</label>
+    <div class="grid3">
+      <input type="password" id="key-gemini-1" placeholder="🔑 Key 1 — AIza…" autocomplete="off">
+      <input type="password" id="key-gemini-2" placeholder="🔑 Key 2 (optional)" autocomplete="off">
+      <input type="password" id="key-gemini-3" placeholder="🔑 Key 3 (optional)" autocomplete="off">
+    </div>
     <label for="key-anthropic">Anthropic API key</label>
     <input type="password" id="key-anthropic" placeholder="sk-ant-…" autocomplete="off">
     <label for="key-openai">OpenAI API key</label>

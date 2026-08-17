@@ -51,7 +51,10 @@ async function init(): Promise<void> {
   const keys = { ...settings.keys };
   if (settings.apiKey && !keys.anthropic) keys.anthropic = settings.apiKey;
   $<HTMLSelectElement>('provider').value = settings.provider ?? 'gemini';
-  $<HTMLInputElement>('key-gemini').value = keys.gemini ?? '';
+  const geminiKeys = (keys.gemini ?? '').split(/[\s,;]+/).filter(Boolean);
+  $<HTMLInputElement>('key-gemini-1').value = geminiKeys[0] ?? '';
+  $<HTMLInputElement>('key-gemini-2').value = geminiKeys[1] ?? '';
+  $<HTMLInputElement>('key-gemini-3').value = geminiKeys[2] ?? '';
   $<HTMLInputElement>('key-anthropic').value = keys.anthropic ?? '';
   $<HTMLInputElement>('key-openai').value = keys.openai ?? '';
   $<HTMLInputElement>('curated-url').value = settings.curatedUrl ?? '';
@@ -60,10 +63,14 @@ async function init(): Promise<void> {
   await refreshStatus();
 
   const saveKeys = async (): Promise<void> => {
+    const gemini = ['key-gemini-1', 'key-gemini-2', 'key-gemini-3']
+      .map((id) => $<HTMLInputElement>(id).value.trim())
+      .filter(Boolean)
+      .join(', ');
     await saveSettings({
       provider: $<HTMLSelectElement>('provider').value as Settings['provider'],
       keys: {
-        gemini: $<HTMLInputElement>('key-gemini').value.trim() || undefined,
+        gemini: gemini || undefined,
         anthropic: $<HTMLInputElement>('key-anthropic').value.trim() || undefined,
         openai: $<HTMLInputElement>('key-openai').value.trim() || undefined,
       },
@@ -71,7 +78,9 @@ async function init(): Promise<void> {
     });
   };
   $('provider').addEventListener('change', () => void saveKeys());
-  $('key-gemini').addEventListener('change', () => void saveKeys());
+  $('key-gemini-1').addEventListener('change', () => void saveKeys());
+  $('key-gemini-2').addEventListener('change', () => void saveKeys());
+  $('key-gemini-3').addEventListener('change', () => void saveKeys());
   $('key-anthropic').addEventListener('change', () => void saveKeys());
   $('key-openai').addEventListener('change', () => void saveKeys());
   $<HTMLInputElement>('curated-url').addEventListener('change', (e) =>
