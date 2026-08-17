@@ -1,4 +1,5 @@
 import type { CategoryId, Level, RuleHit, Verdict } from '../types';
+import { BRANDING, contactLine } from '../branding';
 
 export interface DeepCheckDisplay {
   recommendation: string;
@@ -196,6 +197,28 @@ const CSS = `
   font-size: 10.5px; color: #6b7280; line-height: 1.6;
 }
 .foot .age { color: #9ca3af; }
+.brand {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 9px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,0.07);
+}
+.brand .mark {
+  width: 26px; height: 26px; border-radius: 8px; flex: none;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  background: linear-gradient(135deg, rgba(52,211,153,0.25), rgba(59,130,246,0.25));
+  border: 1px solid rgba(255,255,255,0.14);
+}
+.brand .who { font-size: 10.5px; color: #94a3b8; line-height: 1.45; }
+.brand .who b { color: #e2e8f0; font-weight: 700; }
+.soon {
+  margin-top: 8px; text-align: center; font-size: 11px; font-weight: 800;
+  letter-spacing: 0.03em; padding: 6px 10px; border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  background: linear-gradient(90deg, #34d399, #60a5fa, #34d399);
+  background-size: 200% auto; -webkit-background-clip: text;
+  background-clip: text; color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+@keyframes shimmer { to { background-position: 200% center; } }
 `;
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -357,6 +380,20 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
   foot.appendChild(
     el('div', undefined, 'Checks known rules only — a green result is not a guarantee.'),
   );
+  const brand = el('div', 'brand');
+  brand.appendChild(el('div', 'mark', '🛡️'));
+  const who = el('div', 'who');
+  const line1 = el('div');
+  const b = el('b', undefined, `${BRANDING.product}`);
+  line1.appendChild(b);
+  line1.appendChild(document.createTextNode(` — ${BRANDING.tagline}`));
+  who.appendChild(line1);
+  who.appendChild(
+    el('div', undefined, `by ${BRANDING.owner} · ${BRANDING.company}${contactLine() ? ' · ' + contactLine() : ''}`),
+  );
+  brand.appendChild(who);
+  foot.appendChild(brand);
+  foot.appendChild(el('div', 'soon', BRANDING.comingSoon));
   card.appendChild(foot);
 
   // ----- badge -----

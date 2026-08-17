@@ -55,7 +55,11 @@ export function buildOpenAIBody(l: Listing): object {
   };
 }
 
-export function buildGeminiBody(l: Listing, imagesBase64: { mimeType: string; data: string }[]): object {
+export function buildGeminiBody(
+  l: Listing,
+  imagesBase64: { mimeType: string; data: string }[],
+  opts: { disableThinking?: boolean } = { disableThinking: true },
+): object {
   return {
     contents: [{
       parts: [
@@ -65,7 +69,13 @@ export function buildGeminiBody(l: Listing, imagesBase64: { mimeType: string; da
         })),
       ],
     }],
-    generationConfig: { maxOutputTokens: 500 },
+    generationConfig: {
+      // Flash models think by default and thinking eats the token budget,
+      // truncating the JSON — force plain JSON output with room to spare.
+      maxOutputTokens: 2000,
+      responseMimeType: 'application/json',
+      ...(opts.disableThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+    },
   };
 }
 
@@ -195,20 +205,22 @@ export async function deepCheck(
     const images = (
       await Promise.all(listing.images.slice(0, 3).map(fetchImageBase64))
     ).filter((i): i is { mimeType: string; data: string } => i !== null);
-    body = buildGeminiBody(listing, images);
-
     // model IDs churn — use the cached discovered model, re-discover on 404
     const cached = (await chrome.storage.local.get('geminiModel')).geminiModel as string | undefined;
     let model = cached ?? (await discoverGeminiModel(apiKey));
-    const call = (m: string) =>
+    const call = (m: string, b: object) =>
       fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        { method: 'POST', headers, body: JSON.stringify(body) },
+        { method: 'POST', headers, body: JSON.stringify(b) },
       );
-    let res = await call(model);
-    if (res.status === 404 || res.status === 400) {
+    let res = await call(model, buildGeminiBody(listing, images));
+    if (res.status === 404) {
       model = await discoverGeminiModel(apiKey);
-      res = await call(model);
+      res = await call(model, buildGeminiBody(listing, images));
+    }
+    if (res.status === 400) {
+      // some models reject thinkingConfig — retry without it
+      res = await call(model, buildGeminiBody(listing, images, { disableThinking: false }));
     }
     if (!res.ok) throw new Error(`gemini API ${res.status} (model ${model})`);
     return parseDeepCheckResponse(extractResponseText('gemini', await res.json()));

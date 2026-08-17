@@ -9,5 +9,6 @@ await build({ ...common, entryPoints: ['src/content/main.ts'], outfile: 'dist/co
 await build({ ...common, entryPoints: ['src/worker/index.ts'], outfile: 'dist/worker.js', format: 'esm' });
 await build({ ...common, entryPoints: ['src/options/options.ts'], outfile: 'dist/options.js', format: 'iife' });
 cpSync('public/manifest.json', 'dist/manifest.json');
+cpSync('public/icons', 'dist/icons', { recursive: true });
 cpSync('src/options/options.html', 'dist/options.html');
 console.log('✔ dist/ built');
