@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildAnthropicBody, buildGeminiBody, buildOpenAIBody,
-  extractResponseText, parseDeepCheckResponse, pickGeminiModel, pickGeminiModels, MODELS,
+  extractResponseText, parseDeepCheckResponse, pickGeminiModel, pickGeminiModels,
+  splitKeys, MODELS,
 } from '../../src/worker/ai';
 import type { Listing } from '../../src/types';
 
@@ -96,6 +97,16 @@ describe('pickGeminiModel', () => {
         { name: 'models/gemini-2.5-flash', supportedGenerationMethods: gc },
       ]),
     ).toEqual(['gemini-3.7-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']);
+  });
+});
+
+describe('splitKeys', () => {
+  it('splits on commas, semicolons, whitespace and newlines', () => {
+    expect(splitKeys('AIzaOne, AIzaTwo;AIzaThree\nAIzaFour')).toEqual([
+      'AIzaOne', 'AIzaTwo', 'AIzaThree', 'AIzaFour',
+    ]);
+    expect(splitKeys('  AIzaSolo  ')).toEqual(['AIzaSolo']);
+    expect(splitKeys('')).toEqual([]);
   });
 });
 

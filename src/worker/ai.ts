@@ -180,6 +180,13 @@ async function fetchImageBase64(url: string): Promise<{ mimeType: string; data: 
   }
 }
 
+/** "key1, key2" → ["key1","key2"] — members can stack multiple free Gemini keys */
+export function splitKeys(raw: string): string[] {
+  return raw.split(/[\s,;]+/).map((k) => k.trim()).filter(Boolean);
+}
+
+class GeminiQuotaError extends Error {}
+
 export async function deepCheck(
   listing: Listing,
   provider: Provider,
@@ -207,45 +214,63 @@ export async function deepCheck(
     const images = (
       await Promise.all(listing.images.slice(0, 3).map(fetchImageBase64))
     ).filter((i): i is { mimeType: string; data: string } => i !== null);
-    // model IDs churn AND free-tier quotas differ per model (newest models often
-    // have none) — walk the ranked candidate list, falling back on 404/429,
-    // and cache whichever model actually answers
-    const call = (m: string, b: object) =>
-      fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        { method: 'POST', headers, body: JSON.stringify(b) },
-      );
-    const cached = (await chrome.storage.local.get('geminiModel')).geminiModel as string | undefined;
-    let candidates = cached ? [cached] : await discoverGeminiModels(apiKey);
-    let expanded = !cached;
-    let lastStatus = 0;
-    for (;;) {
-      for (const model of candidates) {
-        let res = await call(model, buildGeminiBody(listing, images));
-        if (res.status === 400) {
-          // some models reject thinkingConfig — retry without it
-          res = await call(model, buildGeminiBody(listing, images, { disableThinking: false }));
+    // Rotate across every configured free key; within a key, walk the ranked
+    // model list (model IDs churn AND free-tier quotas differ per model — the
+    // newest models often have none). Cache whichever model answers.
+    const geminiOnce = async (key: string): Promise<DeepCheckResult> => {
+      const call = (m: string, b: object) =>
+        fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,
+          { method: 'POST', headers, body: JSON.stringify(b) },
+        );
+      const cached = (await chrome.storage.local.get('geminiModel')).geminiModel as string | undefined;
+      let candidates = cached ? [cached] : await discoverGeminiModels(key);
+      let expanded = !cached;
+      let lastStatus = 0;
+      for (;;) {
+        for (const model of candidates) {
+          let res = await call(model, buildGeminiBody(listing, images));
+          if (res.status === 400) {
+            // some models reject thinkingConfig — retry without it
+            res = await call(model, buildGeminiBody(listing, images, { disableThinking: false }));
+          }
+          if (res.ok) {
+            await chrome.storage.local.set({ geminiModel: model });
+            return parseDeepCheckResponse(extractResponseText('gemini', await res.json()));
+          }
+          lastStatus = res.status;
+          if (res.status !== 404 && res.status !== 429 && res.status !== 400) {
+            throw new Error(`gemini API ${res.status} (model ${model})`);
+          }
         }
-        if (res.ok) {
-          await chrome.storage.local.set({ geminiModel: model });
-          return parseDeepCheckResponse(extractResponseText('gemini', await res.json()));
-        }
-        lastStatus = res.status;
-        if (res.status !== 404 && res.status !== 429 && res.status !== 400) {
-          throw new Error(`gemini API ${res.status} (model ${model})`);
-        }
+        if (expanded) break;
+        const all = await discoverGeminiModels(key);
+        candidates = all.filter((m) => m !== cached);
+        expanded = true;
+        if (candidates.length === 0) break;
       }
-      if (expanded) break;
-      const all = await discoverGeminiModels(apiKey);
-      candidates = all.filter((m) => m !== cached);
-      expanded = true;
-      if (candidates.length === 0) break;
+      throw new GeminiQuotaError(String(lastStatus));
+    };
+
+    const keys = splitKeys(apiKey);
+    for (let i = 0; i < keys.length; i++) {
+      try {
+        return await geminiOnce(keys[i]);
+      } catch (e) {
+        if (!(e instanceof GeminiQuotaError) || i === keys.length - 1) {
+          if (e instanceof GeminiQuotaError) {
+            throw new Error(
+              e.message === '429'
+                ? `Gemini free quota is used up on ${keys.length > 1 ? 'all your keys' : 'your key'} right now — wait a minute (limits reset per-minute and daily), add another free key in Options, or switch provider.`
+                : `gemini API ${e.message}`,
+            );
+          }
+          throw e;
+        }
+        // quota exhausted on this key — rotate to the next one
+      }
     }
-    throw new Error(
-      lastStatus === 429
-        ? 'Gemini free quota is used up right now — wait a minute (limits reset per-minute and daily), or switch provider in Options.'
-        : `gemini API ${lastStatus}`,
-    );
+    throw new Error('no Gemini key configured');
   }
 
   const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
