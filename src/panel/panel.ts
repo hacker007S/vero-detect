@@ -249,6 +249,7 @@ const CSS = `
 }
 .brand .pitch { font-size: 10.5px; color: #a7b3c5; line-height: 1.55; margin-top: 8px; }
 .brand .chips { margin-top: 9px; }
+.brand .chips .owner-line { display: flex; justify-content: center; }
 .brand .chip-c {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 10.5px; font-weight: 800; color: #e2e8f0;
@@ -527,7 +528,9 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
   brand.appendChild(head);
   brand.appendChild(el('div', 'pitch', BRANDING.pitch));
   const chips = el('div', 'chips');
-  chips.appendChild(el('span', 'chip-c', `👤 CEO ${BRANDING.owner}`));
+  const ownerLine = el('div', 'owner-line');
+  ownerLine.appendChild(el('span', 'chip-c', `👤 CEO ${BRANDING.owner}`));
+  chips.appendChild(ownerLine);
   const btnRow = el('div', 'btn-row');
   const mail = document.createElement('a');
   mail.className = 'contact-btn chip-mail';
