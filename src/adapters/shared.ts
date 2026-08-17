@@ -1,12 +1,27 @@
-const DIM_RE =
-  /(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×*]\s*(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×*]\s*(\d+(?:\.\d+)?)\s*(cm|mm|in|inch|inches|")/i;
+const UNIT = '(cm|mm|in|inch|inches|")';
+const NUM = '(\\d+(?:\\.\\d+)?)';
+const SEP = `\\s*${UNIT}?\\s*[x×*]\\s*`;
+const DIM3_RE = new RegExp(`${NUM}${SEP}${NUM}${SEP}${NUM}\\s*${UNIT}`, 'i');
+const DIM2_RE = new RegExp(`${NUM}${SEP}${NUM}\\s*${UNIT}`, 'i');
+
+function unitFactor(unit: string): number {
+  const u = unit.toLowerCase();
+  return u === 'mm' ? 0.1 : u.startsWith('in') || u === '"' ? 2.54 : 1;
+}
 
 export function parseDimensionsCm(text: string): { l?: number; w?: number; h?: number } | undefined {
-  const m = text.match(DIM_RE);
-  if (!m) return undefined;
-  const unit = m[4].toLowerCase();
-  const f = unit === 'mm' ? 0.1 : unit.startsWith('in') || unit === '"' ? 2.54 : 1;
-  return { l: +m[1] * f, w: +m[2] * f, h: +m[3] * f };
+  const m3 = text.match(DIM3_RE);
+  if (m3) {
+    // trailing unit governs; a unit is required somewhere so "3 x 5" alone never matches
+    const f = unitFactor(m3[6] ?? m3[4] ?? m3[2] ?? 'cm');
+    return { l: +m3[1] * f, w: +m3[3] * f, h: +m3[5] * f };
+  }
+  const m2 = text.match(DIM2_RE);
+  if (m2) {
+    const f = unitFactor(m2[4] ?? m2[2] ?? 'cm');
+    return { l: +m2[1] * f, w: +m2[3] * f };
+  }
+  return undefined;
 }
 
 export function parseSingleLengthCm(text: string): number | undefined {

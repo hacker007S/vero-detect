@@ -23,6 +23,16 @@ describe('ebayAdapter', () => {
     expect(l.site).toBe('ebay');
     expect(l.brand).toBeUndefined(); // "Unbranded" is not a brand
   });
+  it('reads combined "Item Dimensions" spec when per-axis fields are absent', () => {
+    const doc2 = new DOMParser().parseFromString(
+      `<html><body><h1 class="x-item-title__mainTitle"><span>Storage Box</span></h1>
+       <div><dt class="ux-labels-values__labels"><span>Item Dimensions</span></dt>
+       <dd class="ux-labels-values__values"><span>40 x 30 x 10 cm</span></dd></div></body></html>`,
+      'text/html',
+    );
+    const l = ebayAdapter.extract(doc2, url);
+    expect(l.dimensionsCm).toEqual({ l: 40, w: 30, h: 10 });
+  });
   it('records missing fields instead of guessing', () => {
     const empty = new DOMParser().parseFromString('<html><body></body></html>', 'text/html');
     const l = ebayAdapter.extract(empty, url);

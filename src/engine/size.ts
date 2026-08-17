@@ -33,6 +33,21 @@ export function checkSize(listing: Listing, size: SizeRules): CategoryResult {
     };
   }
 
+  // partial data that raises no flag: known sides fit, but we can't call it clear
+  if (fitsDims && fitsWeight && sides.length < 3) {
+    const known = sides.map((s) => `${Math.round(s * 10) / 10} cm`).join(' × ');
+    return {
+      category: 'size', level: 'unknown', hits: [],
+      note: `Known: ${known}${w !== undefined ? `, ${w} g` : ''} — remaining dimension(s) unknown, check manually.`,
+    };
+  }
+  if (sides.length === 0 && w !== undefined && fitsWeight) {
+    return {
+      category: 'size', level: 'unknown', hits: [],
+      note: `Weight ${w} g fits large letter — dimensions unknown, check manually.`,
+    };
+  }
+
   hits.push({
     ruleId: 'size:parcel', level: 'caution', label: 'Over large-letter size',
     detail:

@@ -12,6 +12,13 @@ describe('parseDimensionsCm', () => {
   it('returns undefined for prose without dimensions', () => {
     expect(parseDimensionsCm('lovely teapot for the whole family')).toBeUndefined();
   });
+  it('parses per-number units and two-dimension strings', () => {
+    expect(parseDimensionsCm('35cm x 25cm x 2.5cm')).toEqual({ l: 35, w: 25, h: 2.5 });
+    expect(parseDimensionsCm('size: 20 x 15 cm approx')).toEqual({ l: 20, w: 15 });
+  });
+  it('requires an explicit unit — "3 x 5" alone never matches', () => {
+    expect(parseDimensionsCm('pack of 3 x 5 items')).toBeUndefined();
+  });
 });
 
 describe('parseWeightG', () => {

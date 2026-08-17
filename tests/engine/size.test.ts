@@ -30,4 +30,18 @@ describe('checkSize', () => {
     const r = checkSize({ ...base, dimensionsCm: { l: 25, w: 35, h: 2 }, weightG: 100 }, size);
     expect(r.level).toBe('clear');
   });
+  it('two known sides that fit → unknown with informative note, not caution', () => {
+    const r = checkSize({ ...base, dimensionsCm: { l: 20, w: 15 } }, size);
+    expect(r.level).toBe('unknown');
+    expect(r.note).toMatch(/20 cm × 15 cm/);
+  });
+  it('two known sides that breach the limit → caution', () => {
+    const r = checkSize({ ...base, dimensionsCm: { l: 50, w: 15 } }, size);
+    expect(r.level).toBe('caution');
+  });
+  it('weight only, within limit → unknown with note', () => {
+    const r = checkSize({ ...base, weightG: 300 }, size);
+    expect(r.level).toBe('unknown');
+    expect(r.note).toMatch(/300 g/);
+  });
 });

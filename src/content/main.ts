@@ -62,6 +62,34 @@ async function run(): Promise<void> {
     at: Date.now(),
   };
   void send({ type: 'log-check', entry });
+
+  // specs/description often lazy-load after first paint — re-extract and
+  // upgrade the verdict if more fields become readable
+  if (finalListing.missing.length > 0) {
+    for (const delay of [4000, 9000]) {
+      setTimeout(() => {
+        if (location.href !== finalListing.url) return;
+        const again = adapter.extract(document, location.href);
+        if (!again.title || again.missing.length >= finalListing.missing.length) return;
+        const better = evaluate(again, pack);
+        const h = document.getElementById(HOST_ID);
+        if (h) {
+          renderPanel(h, better, {
+            rulesAgeLabel: rulesAgeLabel(pack),
+            partial: again.missing.length > 0,
+            onDeepCheck: async () => {
+              const res = await send<{ result?: DeepCheckDisplay; error?: string }>({
+                type: 'deep-check',
+                listing: again,
+              });
+              if (res.result) return res.result;
+              return { error: res.error ?? 'unknown' };
+            },
+          });
+        }
+      }, delay);
+    }
+  }
 }
 
 let lastUrl = location.href;

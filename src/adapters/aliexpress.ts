@@ -35,10 +35,11 @@ export const aliexpressAdapter: Adapter = {
       textOf(doc, ['#product-description', '[class*="description--wrap"]']) ?? undefined;
     if (!description) missing.push('description');
 
-    const dimSource = [specPair(doc, 'size') ?? '', description ?? ''].join(' ');
+    const ogDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute('content') ?? '';
+    const dimSource = [specPair(doc, 'size') ?? '', specPair(doc, 'dimension') ?? '', description ?? '', ogDesc, title].join(' ');
     const dimensionsCm = parseDimensionsCm(dimSource);
     if (!dimensionsCm) missing.push('dimensions');
-    const weightG = parseWeightG([specPair(doc, 'weight') ?? '', description ?? ''].join(' '));
+    const weightG = parseWeightG([specPair(doc, 'weight') ?? '', description ?? '', ogDesc].join(' '));
     if (weightG === undefined) missing.push('weight');
 
     const og = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
