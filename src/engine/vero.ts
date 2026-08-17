@@ -1,7 +1,7 @@
 import type { CategoryResult, Listing, RuleHit, RulesPack, VeroBrand } from '../types';
 import { worst } from '../types';
 import { brandMatchTerm, containsPhrase, normalize, tokens } from './normalize';
-import { fuzzyIncludes } from './fuzzy';
+import { fuzzyIncludes, isCommonWord } from './fuzzy';
 
 const COMPAT = [
   'compatible with', 'for', 'fits', 'to fit', 'fit for', 'replacement for',
@@ -28,8 +28,19 @@ const termCache = new WeakMap<RulesPack, { brand: VeroBrand; term: string }[]>()
 function brandTerms(pack: RulesPack): { brand: VeroBrand; term: string }[] {
   let cached = termCache.get(pack);
   if (!cached) {
+    const famous = new Set(pack.fuzzyBrands.map((n) => brandMatchTerm(n)).filter(Boolean));
     cached = pack.veroBrands
-      .map((brand) => ({ brand, term: brandMatchTerm(brand.name) }))
+      .map((brand) => {
+        let term = brandMatchTerm(brand.name);
+        // an obscure brand whose name reduces to a plain English word
+        // ("Authentic Brands Group" → "authentic") must match a two-word
+        // phrase, or every listing saying "authentic" gets flagged
+        if (term && !term.includes(' ') && isCommonWord(term) && !famous.has(term)) {
+          const words = tokens(brand.name).filter((w) => w.length > 1);
+          if (words.length >= 2) term = words.slice(0, 2).join(' ');
+        }
+        return { brand, term };
+      })
       .filter((e) => e.term !== '');
     termCache.set(pack, cached);
   }

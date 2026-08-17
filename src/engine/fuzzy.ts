@@ -22,6 +22,10 @@ export function editDistance(a: string, b: string): number {
 // Real typos ("dysson") are not dictionary words, so detection is unaffected.
 const DICTIONARY = new Set<string>(englishWords as string[]);
 
+export function isCommonWord(w: string): boolean {
+  return DICTIONARY.has(w);
+}
+
 export function fuzzyIncludes(textTokens: string[], term: string): boolean {
   if (term.includes(' ') || term.length < 5) return false;
   const max = term.length >= 8 ? 2 : 1;

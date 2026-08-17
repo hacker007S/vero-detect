@@ -32,6 +32,13 @@ describe('checkVero', () => {
     const r = checkVero(listing('Dysson cordless vacuum spare part'), pack);
     expect(r.level).toBe('danger');
   });
+  it('common-word brand names need a two-word phrase (Authentic Brands regression)', () => {
+    const r = checkVero(
+      listing('Quality product', { description: '100% authentic item with genuine materials' }),
+      pack,
+    );
+    expect(r.hits.filter((h) => /authentic/i.test(h.label))).toEqual([]);
+  });
   it('never fuzzy-matches obscure VeRO brands (slicer vs Spicer Pro regression)', () => {
     const r = checkVero(listing('Stainless Steel Meat Slicer Pro Kitchen Tool'), pack);
     expect(r.hits.filter((h) => /spicer/i.test(h.label))).toEqual([]);
