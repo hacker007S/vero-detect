@@ -132,7 +132,7 @@ export interface GeminiModelInfo {
  * Preference: supports generateContent, is a "flash" text model (cheap/free tier),
  * not a preview/specialised variant, highest version number; flash beats flash-lite.
  */
-export function pickGeminiModel(models: GeminiModelInfo[]): string | null {
+export function pickGeminiModels(models: GeminiModelInfo[]): string[] {
   const candidates = models
     .map((m) => m.name.replace(/^models\//, ''))
     .filter((_, i) =>
@@ -140,26 +140,28 @@ export function pickGeminiModel(models: GeminiModelInfo[]): string | null {
     )
     .filter((n) => n.includes('flash'))
     .filter((n) => !/(image|live|audio|tts|embedding|thinking|exp|preview)/.test(n));
-  if (candidates.length === 0) return null;
   const version = (n: string) => Number((n.match(/gemini-(\d+(?:\.\d+)?)/) ?? [])[1] ?? 0);
   candidates.sort((a, b) => {
     const lite = Number(a.includes('lite')) - Number(b.includes('lite'));
     if (lite !== 0) return lite; // plain flash before flash-lite
     return version(b) - version(a); // newest first
   });
-  return candidates[0];
+  return candidates;
 }
 
-async function discoverGeminiModel(apiKey: string): Promise<string> {
+export function pickGeminiModel(models: GeminiModelInfo[]): string | null {
+  return pickGeminiModels(models)[0] ?? null;
+}
+
+async function discoverGeminiModels(apiKey: string): Promise<string[]> {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(apiKey)}`,
   );
   if (!res.ok) throw new Error(`gemini ListModels ${res.status}`);
   const data = await res.json();
-  const model = pickGeminiModel((data.models ?? []) as GeminiModelInfo[]);
-  if (!model) throw new Error('gemini: no usable flash model on this key');
-  await chrome.storage.local.set({ geminiModel: model });
-  return model;
+  const models = pickGeminiModels((data.models ?? []) as GeminiModelInfo[]);
+  if (models.length === 0) throw new Error('gemini: no usable flash model on this key');
+  return models;
 }
 
 async function fetchImageBase64(url: string): Promise<{ mimeType: string; data: string } | null> {
@@ -205,25 +207,45 @@ export async function deepCheck(
     const images = (
       await Promise.all(listing.images.slice(0, 3).map(fetchImageBase64))
     ).filter((i): i is { mimeType: string; data: string } => i !== null);
-    // model IDs churn — use the cached discovered model, re-discover on 404
-    const cached = (await chrome.storage.local.get('geminiModel')).geminiModel as string | undefined;
-    let model = cached ?? (await discoverGeminiModel(apiKey));
+    // model IDs churn AND free-tier quotas differ per model (newest models often
+    // have none) — walk the ranked candidate list, falling back on 404/429,
+    // and cache whichever model actually answers
     const call = (m: string, b: object) =>
       fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`,
         { method: 'POST', headers, body: JSON.stringify(b) },
       );
-    let res = await call(model, buildGeminiBody(listing, images));
-    if (res.status === 404) {
-      model = await discoverGeminiModel(apiKey);
-      res = await call(model, buildGeminiBody(listing, images));
+    const cached = (await chrome.storage.local.get('geminiModel')).geminiModel as string | undefined;
+    let candidates = cached ? [cached] : await discoverGeminiModels(apiKey);
+    let expanded = !cached;
+    let lastStatus = 0;
+    for (;;) {
+      for (const model of candidates) {
+        let res = await call(model, buildGeminiBody(listing, images));
+        if (res.status === 400) {
+          // some models reject thinkingConfig — retry without it
+          res = await call(model, buildGeminiBody(listing, images, { disableThinking: false }));
+        }
+        if (res.ok) {
+          await chrome.storage.local.set({ geminiModel: model });
+          return parseDeepCheckResponse(extractResponseText('gemini', await res.json()));
+        }
+        lastStatus = res.status;
+        if (res.status !== 404 && res.status !== 429 && res.status !== 400) {
+          throw new Error(`gemini API ${res.status} (model ${model})`);
+        }
+      }
+      if (expanded) break;
+      const all = await discoverGeminiModels(apiKey);
+      candidates = all.filter((m) => m !== cached);
+      expanded = true;
+      if (candidates.length === 0) break;
     }
-    if (res.status === 400) {
-      // some models reject thinkingConfig — retry without it
-      res = await call(model, buildGeminiBody(listing, images, { disableThinking: false }));
-    }
-    if (!res.ok) throw new Error(`gemini API ${res.status} (model ${model})`);
-    return parseDeepCheckResponse(extractResponseText('gemini', await res.json()));
+    throw new Error(
+      lastStatus === 429
+        ? 'Gemini free quota is used up right now — wait a minute (limits reset per-minute and daily), or switch provider in Options.'
+        : `gemini API ${lastStatus}`,
+    );
   }
 
   const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });

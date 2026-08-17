@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildAnthropicBody, buildGeminiBody, buildOpenAIBody,
-  extractResponseText, parseDeepCheckResponse, pickGeminiModel, MODELS,
+  extractResponseText, parseDeepCheckResponse, pickGeminiModel, pickGeminiModels, MODELS,
 } from '../../src/worker/ai';
 import type { Listing } from '../../src/types';
 
@@ -87,6 +87,15 @@ describe('pickGeminiModel', () => {
   });
   it('returns null when nothing usable exists', () => {
     expect(pickGeminiModel([{ name: 'models/gemini-3.1-pro', supportedGenerationMethods: gc }])).toBeNull();
+  });
+  it('ranks the full fallback chain: newest flash first, flash-lite variants last', () => {
+    expect(
+      pickGeminiModels([
+        { name: 'models/gemini-2.5-flash-lite', supportedGenerationMethods: gc },
+        { name: 'models/gemini-3.7-flash', supportedGenerationMethods: gc },
+        { name: 'models/gemini-2.5-flash', supportedGenerationMethods: gc },
+      ]),
+    ).toEqual(['gemini-3.7-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']);
   });
 });
 
