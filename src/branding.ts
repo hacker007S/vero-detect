@@ -8,11 +8,8 @@ export const BRANDING = {
   company: 'Pycode Ltd',
   email: 'Zahoor@pycode.co.uk',
   phone: '', // e.g. '+44 7xxx xxxxxx' — leave empty to hide
-  tagline: 'List smart. Stay safe.',
-  pitch: 'For any software automation — contact us.',
-  comingSoon: '🚀 Coming soon: Hunting · Listing · Profit & Loss tools — stay tuned!',
+  tagline: 'Your listing bodyguard.',
+  pitch: 'Pycode Ltd builds custom automation for e-commerce sellers — bots, tools & integrations that save hours every day.',
+  cta: '📩 Zahoor@pycode.co.uk — let’s automate your business.',
+  comingSoon: '🚀 Next from Pycode: Product Hunter · Auto Lister · Profit Tracker',
 };
-
-export function contactLine(): string {
-  return [BRANDING.email, BRANDING.phone].filter(Boolean).join(' · ');
-}

@@ -1,5 +1,6 @@
 import type { CategoryId, Level, RuleHit, Verdict } from '../types';
-import { BRANDING, contactLine } from '../branding';
+import { BRANDING } from '../branding';
+import logoUrl from '../../public/icons/icon128.png';
 
 export interface DeepCheckDisplay {
   recommendation: string;
@@ -198,17 +199,24 @@ const CSS = `
 }
 .foot .age { color: #9ca3af; }
 .brand {
-  display: flex; align-items: center; gap: 9px;
-  margin-top: 9px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: flex-start; gap: 11px;
+  margin-top: 10px; padding: 10px 11px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(52,211,153,0.07), rgba(59,130,246,0.09));
+  border: 1px solid rgba(255,255,255,0.09);
 }
-.brand .mark {
-  width: 26px; height: 26px; border-radius: 8px; flex: none;
-  display: flex; align-items: center; justify-content: center; font-size: 14px;
-  background: linear-gradient(135deg, rgba(52,211,153,0.25), rgba(59,130,246,0.25));
-  border: 1px solid rgba(255,255,255,0.14);
+.brand .mark-img {
+  width: 34px; height: 34px; border-radius: 9px; flex: none;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
 }
-.brand .who { font-size: 10.5px; color: #94a3b8; line-height: 1.45; }
-.brand .who b { color: #e2e8f0; font-weight: 700; }
+.brand .who { font-size: 10.5px; color: #94a3b8; line-height: 1.5; }
+.brand .who .line1 { font-size: 12px; margin-bottom: 1px; }
+.brand .who b { color: #f1f5f9; font-weight: 800; }
+.brand .who .grad {
+  background: linear-gradient(90deg, #34d399, #60a5fa);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 800;
+}
+.brand .who .cta { color: #93c5fd; margin-top: 3px; font-weight: 600; }
 .soon {
   margin-top: 8px; text-align: center; font-size: 11px; font-weight: 800;
   letter-spacing: 0.03em; padding: 6px 10px; border-radius: 999px;
@@ -381,20 +389,22 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
     el('div', undefined, 'Checks known rules only — a green result is not a guarantee.'),
   );
   const brand = el('div', 'brand');
-  brand.appendChild(el('div', 'mark', '🛡️'));
+  const mark = document.createElement('img');
+  mark.className = 'mark-img';
+  mark.src = logoUrl;
+  mark.alt = BRANDING.company;
+  brand.appendChild(mark);
   const who = el('div', 'who');
-  const line1 = el('div');
-  const b = el('b', undefined, `${BRANDING.product}`);
-  line1.appendChild(b);
-  line1.appendChild(document.createTextNode(` — ${BRANDING.tagline}`));
+  const line1 = el('div', 'line1');
+  line1.appendChild(el('b', undefined, BRANDING.product));
+  line1.appendChild(document.createTextNode(' — '));
+  line1.appendChild(el('span', 'grad', BRANDING.tagline));
   who.appendChild(line1);
-  who.appendChild(
-    el('div', undefined, `by ${BRANDING.owner} · ${BRANDING.company}${contactLine() ? ' · ' + contactLine() : ''}`),
-  );
   who.appendChild(el('div', undefined, BRANDING.pitch));
+  who.appendChild(el('div', 'cta', BRANDING.cta));
   brand.appendChild(who);
   foot.appendChild(brand);
-  foot.appendChild(el('div', 'soon', BRANDING.comingSoon));
+  foot.appendChild(el('div', 'soon', `${BRANDING.comingSoon} — stay tuned!`));
   card.appendChild(foot);
 
   // ----- badge -----
