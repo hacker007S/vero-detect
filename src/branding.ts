@@ -7,7 +7,9 @@ export const BRANDING = {
   owner: 'Zahoor Khan',
   company: 'PYCODE LTD',
   email: 'Zahoor@pycode.co.uk',
-  phone: '', // e.g. '+44 7xxx xxxxxx' — leave empty to hide
+  phone: '+44 7424 375903',
+  whatsapp: '447424375903', // digits only, international format — used for the wa.me link
+  whatsappMessage: 'Hi Zahoor! 👋 When is the next Pycode tool coming? 🚀 (via VeRO Detect)',
   tagline: 'Your listing bodyguard.',
   pitch: 'Custom automation for e-commerce sellers — bots, tools & integrations that save hours every day.',
   upcoming: [
