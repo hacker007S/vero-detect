@@ -248,29 +248,38 @@ const CSS = `
   box-shadow: 0 2px 8px rgba(52,211,153,0.35);
 }
 .brand .pitch { font-size: 10.5px; color: #a7b3c5; line-height: 1.55; margin-top: 8px; }
-.brand .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
+.brand .chips { margin-top: 9px; }
 .brand .chip-c {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 10px; font-weight: 700; color: #cbd5e1; text-decoration: none;
-  padding: 4px 10px; border-radius: 999px;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  font-size: 10.5px; font-weight: 800; color: #e2e8f0;
+  padding: 4px 12px; border-radius: 999px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
 }
-a.chip-c:hover { background: rgba(59,130,246,0.18); border-color: rgba(147,197,253,0.45); color: #bfdbfe; }
-.chip-wa {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 10.5px; font-weight: 800; color: #06331d; text-decoration: none;
-  padding: 5px 13px; border-radius: 999px;
-  background: linear-gradient(180deg, #3ae375, #25d366 60%, #1fb959);
+.brand .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+.contact-btn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  font-size: 11px; font-weight: 800; text-decoration: none;
+  padding: 8px 0; border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.35);
+  transition: transform 0.15s cubic-bezier(0.32,0.72,0,1), box-shadow 0.15s ease, filter 0.15s ease;
+}
+.contact-btn:hover { transform: translateY(-2px); filter: brightness(1.07); }
+.contact-btn:active { transform: translateY(0) scale(0.98); }
+.contact-btn svg { width: 14px; height: 14px; flex: none; }
+.chip-wa {
+  color: #06331d;
+  background: linear-gradient(180deg, #3ae375, #25d366 60%, #1fb959);
   box-shadow: 0 4px 11px rgba(37,211,102,0.42), inset 0 1px 0 rgba(255,255,255,0.5);
-  transition: transform 0.15s cubic-bezier(0.32,0.72,0,1), box-shadow 0.15s ease;
 }
-.chip-wa:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 7px 17px rgba(37,211,102,0.58), inset 0 1px 0 rgba(255,255,255,0.55);
+.chip-wa:hover { box-shadow: 0 7px 17px rgba(37,211,102,0.58), inset 0 1px 0 rgba(255,255,255,0.55); }
+.chip-wa svg { fill: #06331d; }
+.chip-mail {
+  color: #fff;
+  background: linear-gradient(180deg, #f26a5e, #ea4335 60%, #cf3325);
+  box-shadow: 0 4px 11px rgba(234,67,53,0.42), inset 0 1px 0 rgba(255,255,255,0.45);
 }
-.chip-wa svg { width: 13px; height: 13px; fill: #06331d; flex: none; }
+.chip-mail:hover { box-shadow: 0 7px 17px rgba(234,67,53,0.58), inset 0 1px 0 rgba(255,255,255,0.5); }
+.chip-mail svg { fill: #fff; }
 
 /* ---------- upcoming products ---------- */
 .upcoming {
@@ -518,14 +527,22 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
   brand.appendChild(head);
   brand.appendChild(el('div', 'pitch', BRANDING.pitch));
   const chips = el('div', 'chips');
-  chips.appendChild(el('span', 'chip-c', `👤 ${BRANDING.owner}`));
+  chips.appendChild(el('span', 'chip-c', `👤 CEO ${BRANDING.owner}`));
+  const btnRow = el('div', 'btn-row');
   const mail = document.createElement('a');
-  mail.className = 'chip-c';
-  mail.href = `mailto:${BRANDING.email}`;
-  mail.textContent = `📩 ${BRANDING.email}`;
-  chips.appendChild(mail);
+  mail.className = 'contact-btn chip-mail';
+  mail.href =
+    `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(BRANDING.email)}` +
+    `&su=${encodeURIComponent(BRANDING.gmailSubject)}&body=${encodeURIComponent(BRANDING.gmailBody)}`;
+  mail.target = '_blank';
+  mail.rel = 'noopener noreferrer';
+  // static trusted markup — envelope glyph
+  mail.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4.236-8 4.882-8-4.882V6.618l8 4.882 8-4.882v1.618z"/></svg>' +
+    '<span>Gmail</span>';
+  btnRow.appendChild(mail);
   const wa = document.createElement('a');
-  wa.className = 'chip-wa';
+  wa.className = 'contact-btn chip-wa';
   wa.href = `https://wa.me/${BRANDING.whatsapp}?text=${encodeURIComponent(BRANDING.whatsappMessage)}`;
   wa.target = '_blank';
   wa.rel = 'noopener noreferrer';
@@ -533,7 +550,8 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
   wa.innerHTML =
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>' +
     '<span>WhatsApp</span>';
-  chips.appendChild(wa);
+  btnRow.appendChild(wa);
+  chips.appendChild(btnRow);
   brand.appendChild(chips);
   foot.appendChild(brand);
 

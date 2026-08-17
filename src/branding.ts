@@ -9,7 +9,12 @@ export const BRANDING = {
   email: 'Zahoor@pycode.co.uk',
   phone: '+44 7424 375903',
   whatsapp: '447424375903', // digits only, international format — used for the wa.me link
-  whatsappMessage: 'Hi Zahoor! 👋 When is the next Pycode tool coming? 🚀 (via VeRO Detect)',
+  // plain text only — emoji get corrupted by WhatsApp's URL handling on some devices
+  whatsappMessage:
+    "Hi Zahoor! I'm using VeRO Detect. When is the next Pycode tool launching? I'm also interested in custom automation for my store.",
+  gmailSubject: 'VeRO Detect user — next tools & custom automation',
+  gmailBody:
+    "Hi Zahoor,\n\nI'm using VeRO Detect. I'd like to know when the next Pycode tool is launching — and I'm interested in custom automation for my business.\n\nThanks!",
   tagline: 'Your listing bodyguard.',
   pitch: 'Custom automation for e-commerce sellers — bots, tools & integrations that save hours every day.',
   upcoming: [
