@@ -47,9 +47,12 @@ export const aliexpressAdapter: Adapter = {
     if (images.length === 0) missing.push('images');
 
     const cleanBrand = brand && !/^(no|none|oem|no brand)$/i.test(brand) ? brand : undefined;
+    const choice = Boolean(
+      doc.querySelector('[class*="choice" i], img[src*="choice_" i], img[src*="/choice" i]'),
+    );
     return {
       site: 'aliexpress', url, title, brand: cleanBrand, description,
-      priceGBP, images, dimensionsCm, weightG, material, missing,
+      priceGBP, images, dimensionsCm, weightG, material, choice, missing,
     };
   },
 };

@@ -12,6 +12,7 @@ const verdict: Verdict = {
     { category: 'size', level: 'unknown', hits: [], note: 'Size unknown — check manually.' },
     { category: 'sensitive', level: 'clear', hits: [] },
     { category: 'fragile', level: 'clear', hits: [] },
+    { category: 'dropship', level: 'clear', hits: [] },
   ],
   rulesVersion: '2026-08-16.1', rulesFetchedAt: 0, checkedAt: Date.now(),
 };
@@ -23,7 +24,7 @@ describe('renderPanel', () => {
     renderPanel(host, verdict, { rulesAgeLabel: 'rules 2026-08-16.1', partial: true });
     const sr = host.shadowRoot!;
     expect(sr.querySelector('.badge')!.textContent).toMatch(/DO NOT LIST/i);
-    expect(sr.querySelectorAll('.cat-row')).toHaveLength(6);
+    expect(sr.querySelectorAll('.cat-row')).toHaveLength(7);
     expect(sr.querySelector('.cat-row[data-cat="vero"] .status-dot')!.classList.contains('lv-danger')).toBe(true);
     expect(sr.querySelector('.cat-row[data-cat="prohibited"] .status-dot')!.classList.contains('lv-clear')).toBe(true);
     expect(sr.querySelector('.cat-row[data-cat="size"] .status-dot')!.classList.contains('lv-unknown')).toBe(true);

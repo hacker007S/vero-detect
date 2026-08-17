@@ -20,6 +20,7 @@ const META: Record<CategoryId, { icon: string; name: string }> = {
   size: { icon: '📦', name: 'Size & weight' },
   sensitive: { icon: '⚠️', name: 'Sensitive item' },
   fragile: { icon: '🥂', name: 'Fragile' },
+  dropship: { icon: '🚚', name: 'Dropship fit' },
 };
 
 const LEVEL_META: Record<Level, { word: string; chip: string; color: string; glyph: string }> = {

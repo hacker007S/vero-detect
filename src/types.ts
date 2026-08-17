@@ -1,6 +1,7 @@
 export type Site = 'aliexpress' | 'ebay' | 'amazon';
 export type Level = 'clear' | 'caution' | 'danger' | 'unknown';
-export type CategoryId = 'vero' | 'prohibited' | 'branded' | 'size' | 'sensitive' | 'fragile';
+export type CategoryId =
+  | 'vero' | 'prohibited' | 'branded' | 'size' | 'sensitive' | 'fragile' | 'dropship';
 
 export interface Listing {
   site: Site;
@@ -13,6 +14,8 @@ export interface Listing {
   dimensionsCm?: { l?: number; w?: number; h?: number };
   weightG?: number;
   material?: string;
+  /** AliExpress "Choice" listing — ships in AliExpress-branded packaging */
+  choice?: boolean;
   missing: string[];
 }
 
@@ -49,7 +52,7 @@ export interface VeroBrand {
 
 export interface KeywordClass {
   id: string;
-  category: 'prohibited' | 'sensitive' | 'fragile';
+  category: 'prohibited' | 'sensitive' | 'fragile' | 'dropship';
   level: 'caution' | 'danger';
   label: string;
   keywords: string[];

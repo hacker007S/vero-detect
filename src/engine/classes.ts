@@ -5,7 +5,7 @@ import { containsPhrase, normalize, tokens } from './normalize';
 export function checkClasses(
   listing: Listing,
   pack: RulesPack,
-  category: 'prohibited' | 'sensitive' | 'fragile',
+  category: 'prohibited' | 'sensitive' | 'fragile' | 'dropship',
 ): CategoryResult {
   const raw = [
     listing.title,

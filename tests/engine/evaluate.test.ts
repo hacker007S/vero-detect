@@ -40,9 +40,30 @@ describe('evaluate — known answers', () => {
   it('categories come in fixed order and verdict carries rules metadata', () => {
     const v = evaluate(listing('anything'), pack);
     expect(v.categories.map((c) => c.category)).toEqual([
-      'vero', 'prohibited', 'branded', 'size', 'sensitive', 'fragile',
+      'vero', 'prohibited', 'branded', 'size', 'sensitive', 'fragile', 'dropship',
     ]);
     expect(v.rulesVersion).toBe(pack.version);
     expect(v.checkedAt).toBeGreaterThan(0);
+  });
+  it('dropship: AliExpress item over £3.40 fails the cost gate', () => {
+    const v = evaluate(listing('Cable organiser box', { priceGBP: 5.99, dimensionsCm: { l: 10, w: 8, h: 2 }, weightG: 90 }), pack);
+    const d = v.categories.find((c) => c.category === 'dropship')!;
+    expect(d.level).toBe('caution');
+    expect(d.hits[0].ruleId).toBe('dropship:cost-gate');
+  });
+  it('dropship: cheap AliExpress item passes with a note; eBay items skip the gate', () => {
+    const v = evaluate(listing('Cable organiser box', { priceGBP: 2.1 }), pack);
+    const d = v.categories.find((c) => c.category === 'dropship')!;
+    expect(d.level).toBe('clear');
+    expect(d.note).toMatch(/passes/);
+    const e = evaluate({ ...listing('Cable organiser'), site: 'ebay', priceGBP: 9.99 }, pack);
+    expect(e.categories.find((c) => c.category === 'dropship')!.hits).toEqual([]);
+  });
+  it('dropship: Choice packaging and apparel flags', () => {
+    const v = evaluate(listing('Running trainers breathable', { priceGBP: 3.0, choice: true }), pack);
+    const d = v.categories.find((c) => c.category === 'dropship')!;
+    const ids = d.hits.map((h) => h.ruleId);
+    expect(ids).toContain('dropship:choice-packaging');
+    expect(ids).toContain('class:high-return-apparel');
   });
 });

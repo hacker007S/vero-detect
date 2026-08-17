@@ -4,6 +4,7 @@ import { checkVero } from './vero';
 import { checkClasses } from './classes';
 import { checkBranded } from './branded';
 import { checkSize } from './size';
+import { checkDropship } from './dropship';
 
 export function evaluate(listing: Listing, pack: RulesPack): Verdict {
   const vero = checkVero(listing, pack);
@@ -15,6 +16,7 @@ export function evaluate(listing: Listing, pack: RulesPack): Verdict {
     checkSize(listing, pack.size),
     checkClasses(listing, pack, 'sensitive'),
     checkClasses(listing, pack, 'fragile'),
+    checkDropship(listing, pack),
   ];
   return {
     overall: worst(categories.map((c) => c.level)),
