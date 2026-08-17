@@ -247,20 +247,59 @@ a.chip-c:hover { background: rgba(59,130,246,0.18); border-color: rgba(147,197,2
   background-clip: text; color: transparent; animation: shimmer 3s linear infinite;
 }
 @keyframes shimmer { to { background-position: 200% center; } }
-.up-item { margin-top: 9px; }
-.up-top { display: flex; align-items: baseline; font-size: 11px; font-weight: 700; color: #e2e8f0; }
-.up-top .up-pct { margin-left: auto; font-size: 10px; font-weight: 800; color: #93c5fd; }
+.up-item {
+  margin-top: 8px; padding: 10px 11px; border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 5px 12px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.10);
+  transition: transform 0.18s cubic-bezier(0.32,0.72,0,1), box-shadow 0.18s ease;
+  animation: rowIn 0.45s cubic-bezier(0.32,0.72,0,1) backwards;
+}
+.up-item:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+@keyframes rowIn { from { opacity: 0; transform: translateY(10px); } }
+.up-top { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 700; color: #f1f5f9; }
+.rank {
+  width: 17px; height: 17px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 900; color: #17181c;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.65);
+}
+.rank-1 { background: radial-gradient(circle at 30% 28%, #fde68a, #f59e0b 75%); }
+.rank-2 { background: radial-gradient(circle at 30% 28%, #f8fafc, #94a3b8 75%); }
+.rank-3 { background: radial-gradient(circle at 30% 28%, #fdba74, #b45309 80%); }
+.up-top .up-pct {
+  margin-left: auto; font-size: 10px; font-weight: 900; color: var(--c2);
+  padding: 2px 8px; border-radius: 999px;
+  background: color-mix(in srgb, var(--c2) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c2) 40%, transparent);
+}
 .up-bar {
-  height: 6px; border-radius: 999px; overflow: hidden; margin-top: 4px;
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.06);
+  height: 9px; border-radius: 999px; overflow: hidden; margin-top: 7px;
+  background: rgba(0,0,0,0.38); border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.55);
 }
 .up-fill {
-  height: 100%; border-radius: 999px; width: 0;
-  background: linear-gradient(90deg, #34d399, #60a5fa);
-  box-shadow: 0 0 8px rgba(52,211,153,0.55);
-  transition: width 1s cubic-bezier(0.32,0.72,0,1);
+  position: relative; height: 100%; width: 0; border-radius: 999px;
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 0 11px color-mix(in srgb, var(--c2) 60%, transparent);
+  transition: width 1.1s cubic-bezier(0.32,0.72,0,1);
 }
-.upcoming .stay { font-size: 10px; color: #7c8aa0; margin-top: 9px; text-align: center; font-weight: 600; }
+.up-fill::before {
+  content: ''; position: absolute; left: 2px; right: 2px; top: 1px; height: 40%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0));
+}
+.up-fill::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 34px; left: -40px;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: sweep 2.6s ease-in-out infinite;
+}
+@keyframes sweep { 0% { left: -40px; } 55%, 100% { left: 110%; } }
+.upcoming .stay { font-size: 10px; color: #7c8aa0; margin-top: 10px; text-align: center; font-weight: 600; }
 `;
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -456,9 +495,13 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
   upTitle.appendChild(el('span', 'shine', 'Upcoming from Pycode'));
   upcoming.appendChild(upTitle);
   const fills: { node: HTMLElement; pct: number }[] = [];
-  for (const item of BRANDING.upcoming) {
+  BRANDING.upcoming.forEach((item, i) => {
     const row = el('div', 'up-item');
+    row.style.setProperty('--c1', item.colors[0]);
+    row.style.setProperty('--c2', item.colors[1]);
+    row.style.animationDelay = `${i * 0.13}s`;
     const top = el('div', 'up-top');
+    top.appendChild(el('span', `rank rank-${i + 1}`, String(i + 1)));
     top.appendChild(el('span', undefined, `${item.emoji} ${item.name}`));
     top.appendChild(el('span', 'up-pct', `${item.progress}%`));
     row.appendChild(top);
@@ -468,7 +511,7 @@ export function renderPanel(container: HTMLElement, verdict: Verdict, opts: Pane
     row.appendChild(bar);
     upcoming.appendChild(row);
     fills.push({ node: fill, pct: item.progress });
-  }
+  });
   upcoming.appendChild(el('div', 'stay', 'Stay tuned — big things are coming ✨'));
   foot.appendChild(upcoming);
   // animate the bars in after paint

@@ -11,8 +11,8 @@ export const BRANDING = {
   tagline: 'Your listing bodyguard.',
   pitch: 'Custom automation for e-commerce sellers — bots, tools & integrations that save hours every day.',
   upcoming: [
-    { emoji: '🔎', name: 'Product Hunter', progress: 62 },
-    { emoji: '📤', name: 'Auto Lister', progress: 38 },
-    { emoji: '📊', name: 'Profit Tracker', progress: 62 },
+    { emoji: '📊', name: 'Profit Tracker', progress: 60, colors: ['#34d399', '#06b6d4'] },
+    { emoji: '🔎', name: 'Product Hunter', progress: 40, colors: ['#60a5fa', '#a78bfa'] },
+    { emoji: '📤', name: 'Auto Lister', progress: 25, colors: ['#fbbf24', '#fb923c'] },
   ],
 };
