@@ -147,13 +147,39 @@ const CSS = `
 /* ---------- deep check ---------- */
 .deep { margin: 4px 18px 10px; }
 .deep button {
-  width: 100%; border: 1px solid rgba(147, 197, 253, 0.35); cursor: pointer;
-  background: rgba(59, 130, 246, 0.14); color: #93c5fd;
-  padding: 9px 0; border-radius: 10px; font-size: 12.5px; font-weight: 700;
-  transition: background 0.15s ease;
+  position: relative; overflow: hidden; width: 100%; cursor: pointer;
+  padding: 12px 0; border-radius: 12px;
+  font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; color: #eaf2ff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  background:
+    linear-gradient(180deg, rgba(147,197,253,0.30), rgba(59,130,246,0.10) 55%, rgba(37,99,235,0.22)),
+    rgba(17, 24, 39, 0.55);
+  border: 1px solid rgba(147, 197, 253, 0.5);
+  backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+  box-shadow:
+    0 7px 18px rgba(37, 99, 235, 0.30),
+    0 2px 5px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -7px 14px rgba(37, 99, 235, 0.22);
+  transition: transform 0.16s cubic-bezier(0.32,0.72,0,1), box-shadow 0.16s ease, filter 0.16s ease;
 }
-.deep button:hover { background: rgba(59, 130, 246, 0.24); }
-.deep button:disabled { opacity: 0.55; cursor: wait; }
+.deep button::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 46px; left: -60px;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: sweep 3.2s ease-in-out infinite;
+}
+.deep button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow:
+    0 12px 26px rgba(37, 99, 235, 0.42),
+    0 3px 7px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -7px 14px rgba(37, 99, 235, 0.26);
+}
+.deep button:active { transform: translateY(0) scale(0.99); }
+.deep button:disabled { opacity: 0.6; cursor: wait; transform: none; }
 .deep .spin {
   display: inline-block; width: 11px; height: 11px; border-radius: 50%;
   border: 2px solid #93c5fd; border-top-color: transparent;
