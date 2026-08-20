@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
   "name": "VeRO Detect",
-  "version": "1.9.5",
+  "version": "2.0.0",
   "description": "Checks AliExpress, eBay and Amazon products against eBay VeRO and UK restricted-item rules before you list them.",
-  "permissions": ["storage", "alarms"],
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
   "host_permissions": [
     "https://*.ebay.co.uk/*",
     "https://raw.githubusercontent.com/*",
@@ -20,10 +23,16 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_icon": { "16": "icons/icon16.png", "48": "icons/icon48.png" },
-    "default_title": "VeRO Detect — by Pycode Ltd"
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    },
+    "default_title": "VeRO Detect \u2014 by Pycode Ltd"
   },
-  "background": { "service_worker": "worker.js", "type": "module" },
+  "background": {
+    "service_worker": "worker.js",
+    "type": "module"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -34,7 +43,9 @@
         "https://www.amazon.co.uk/*",
         "https://www.amazon.com/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
