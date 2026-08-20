@@ -160,6 +160,8 @@ async function discoverGeminiModels(apiKey: string): Promise<string[]> {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(apiKey)}`,
   );
+  // 401/403: Google refused the key itself (invalid, deleted, or restricted)
+  if (res.status === 401 || res.status === 403) throw new GeminiKeyError(String(res.status));
   if (!res.ok) throw new Error(`gemini ListModels ${res.status}`);
   const data = await res.json();
   const models = pickGeminiModels((data.models ?? []) as GeminiModelInfo[]);
@@ -189,6 +191,7 @@ export function splitKeys(raw: string): string[] {
 }
 
 class GeminiQuotaError extends Error {}
+class GeminiKeyError extends Error {}
 
 export async function deepCheck(
   listing: Listing,
@@ -242,7 +245,12 @@ export async function deepCheck(
             return parseDeepCheckResponse(extractResponseText('gemini', await res.json()));
           }
           lastStatus = res.status;
-          if (res.status !== 404 && res.status !== 429 && res.status !== 400) {
+          if (res.status === 401) throw new GeminiKeyError('401');
+          // 404/400: model gone or rejects our request shape; 403: this model not
+          // available to the key's tier; 429: quota; 500/503: Google-side failure
+          // or model overloaded (transient, hits the newest flash models hardest)
+          // — all worth trying the next model for.
+          if (![400, 403, 404, 429, 500, 503].includes(res.status)) {
             throw new Error(`gemini API ${res.status} (model ${model})`);
           }
         }
@@ -260,17 +268,29 @@ export async function deepCheck(
       try {
         return await geminiOnce(keys[i]);
       } catch (e) {
-        if (!(e instanceof GeminiQuotaError) || i === keys.length - 1) {
-          if (e instanceof GeminiQuotaError) {
+        const rotatable = e instanceof GeminiQuotaError || e instanceof GeminiKeyError;
+        if (!rotatable || i === keys.length - 1) {
+          if (e instanceof GeminiKeyError) {
             throw new Error(
-              e.message === '429'
-                ? `Gemini free quota is used up on ${keys.length > 1 ? 'all your keys' : 'your key'} right now — wait a minute (limits reset per-minute and daily), add another free key in Options, or switch provider.`
-                : `gemini API ${e.message}`,
+              `Google rejected your Gemini API key (${e.message})${keys.length > 1 ? ' — and every other configured key' : ''} — the key is invalid, was deleted, or is restricted. Create a free key at aistudio.google.com/apikey and paste it into Options.`,
             );
+          }
+          if (e instanceof GeminiQuotaError) {
+            if (e.message === '429') {
+              throw new Error(
+                `Gemini free quota is used up on ${keys.length > 1 ? 'all your keys' : 'your key'} right now — wait a minute (limits reset per-minute and daily), add another free key in Options, or switch provider.`,
+              );
+            }
+            if (e.message === '503' || e.message === '500') {
+              throw new Error(
+                'Gemini is temporarily overloaded on every available model (Google-side, not your key) — try again in a minute or switch provider in Options.',
+              );
+            }
+            throw new Error(`gemini API ${e.message}`);
           }
           throw e;
         }
-        // quota exhausted on this key — rotate to the next one
+        // quota exhausted or key rejected — rotate to the next key
       }
     }
     throw new Error('no Gemini key configured');

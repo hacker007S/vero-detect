@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  buildAnthropicBody, buildGeminiBody, buildOpenAIBody,
+  buildAnthropicBody, buildGeminiBody, buildOpenAIBody, deepCheck,
   extractResponseText, parseDeepCheckResponse, pickGeminiModel, pickGeminiModels,
   splitKeys, MODELS,
 } from '../../src/worker/ai';
@@ -107,6 +107,117 @@ describe('splitKeys', () => {
     ]);
     expect(splitKeys('  AIzaSolo  ')).toEqual(['AIzaSolo']);
     expect(splitKeys('')).toEqual([]);
+  });
+});
+
+describe('deepCheck gemini fallback', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const OK_JSON = {
+    candidates: [{
+      content: {
+        parts: [{
+          text: '{"brand":null,"logoLikely":false,"concerns":[],"recommendation":"clear","reasoning":"ok"}',
+        }],
+      },
+    }],
+  };
+
+  function stubChrome(store: Record<string, unknown>) {
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: async () => ({ ...store }),
+          set: async (v: Record<string, unknown>) => { Object.assign(store, v); },
+        },
+      },
+    });
+    return store;
+  }
+
+  it('falls back to the next model when the cached model returns 503', async () => {
+    const store = stubChrome({ geminiModel: 'gemini-3.7-flash' });
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', async (url: string) => {
+      if (url.startsWith('https://img/')) return { ok: false } as Response;
+      if (url.includes('/v1beta/models?')) {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            models: [
+              { name: 'models/gemini-3.7-flash', supportedGenerationMethods: ['generateContent'] },
+              { name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] },
+            ],
+          }),
+        } as Response;
+      }
+      const model = url.match(/models\/([^:]+):generateContent/)![1];
+      calls.push(model);
+      if (model === 'gemini-3.7-flash') return { ok: false, status: 503 } as Response;
+      return { ok: true, status: 200, json: async () => OK_JSON } as Response;
+    });
+
+    const r = await deepCheck(listing, 'gemini', 'AIzaKey');
+    expect(r.recommendation).toBe('clear');
+    expect(calls).toEqual(['gemini-3.7-flash', 'gemini-2.5-flash']);
+    expect(store.geminiModel).toBe('gemini-2.5-flash');
+  });
+
+  it('reports overload plainly when every model returns 503', async () => {
+    stubChrome({});
+    vi.stubGlobal('fetch', async (url: string) => {
+      if (url.startsWith('https://img/')) return { ok: false } as Response;
+      if (url.includes('/v1beta/models?')) {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            models: [
+              { name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] },
+            ],
+          }),
+        } as Response;
+      }
+      return { ok: false, status: 503 } as Response;
+    });
+
+    await expect(deepCheck(listing, 'gemini', 'AIzaKey')).rejects.toThrow(/overloaded/i);
+  });
+
+  it('explains a rejected key (401) and points at AI Studio', async () => {
+    stubChrome({});
+    vi.stubGlobal('fetch', async (url: string) => {
+      if (url.startsWith('https://img/')) return { ok: false } as Response;
+      return { ok: false, status: 401 } as Response;
+    });
+
+    await expect(deepCheck(listing, 'gemini', 'AIzaBadKey')).rejects.toThrow(
+      /rejected.*aistudio\.google\.com/is,
+    );
+  });
+
+  it('rotates to the next key when one key is rejected', async () => {
+    const store = stubChrome({});
+    vi.stubGlobal('fetch', async (url: string) => {
+      if (url.startsWith('https://img/')) return { ok: false } as Response;
+      if (url.includes('key=AIzaBad')) return { ok: false, status: 401 } as Response;
+      if (url.includes('/v1beta/models?')) {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            models: [
+              { name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] },
+            ],
+          }),
+        } as Response;
+      }
+      return { ok: true, status: 200, json: async () => OK_JSON } as Response;
+    });
+
+    const r = await deepCheck(listing, 'gemini', 'AIzaBad, AIzaGood');
+    expect(r.recommendation).toBe('clear');
+    expect(store.geminiModel).toBe('gemini-2.5-flash');
   });
 });
 
