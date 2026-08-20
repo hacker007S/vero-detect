@@ -1,0 +1,28 @@
+════════ VeRO DETECT — REMAINING DASHBOARD FIELDS (in order) ════════
+
+──── PRIVACY TAB ────
+
+[1] SINGLE PURPOSE DESCRIPTION:
+Checks product listings the user is viewing on eBay, Amazon and AliExpress against eBay VeRO and UK restricted-item rules to help sellers avoid policy violations.
+
+[2] storage JUSTIFICATION:
+Saves the user's settings (such as their optional AI API key) and the cached rules pack locally in the browser. Nothing is transmitted.
+
+[3] alarms JUSTIFICATION:
+Schedules the weekly refresh of the public rules data file so VeRO brand checks stay current.
+
+[4] HOST PERMISSIONS JUSTIFICATION:
+ebay.co.uk, ebayimg.com, aliexpress.com, amazon domains and their image CDNs: the product pages and images the user is viewing, which the extension reads locally in the browser to perform its checks. raw.githubusercontent.com: downloads the public rules DATA file (pure JSON; no executable code is ever fetched or run). generativelanguage.googleapis.com, api.openai.com, api.anthropic.com: contacted ONLY if the user saves their own API key and manually clicks "Deep check" — the listing text is sent to the provider the user chose, under their own account.
+
+[5] REMOTE CODE: select "No, I am not using remote code"
+
+[6] DATA USAGE: tick NOTHING in the data-collected list (extension collects no user data). Certify all three Limited Use disclosures.
+
+[7] PRIVACY POLICY URL:
+https://hacker007s.github.io/vero-detect/privacy.html
+
+──── DISTRIBUTION TAB ────
+Visibility: Public · Payment: Free · Regions: All regions
+
+──── FINAL ────
+Click "Submit for review". Do NOT resubmit while pending (1-7 days).
