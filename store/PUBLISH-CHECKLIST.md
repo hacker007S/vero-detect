@@ -4,8 +4,7 @@
 - [x] Manifest V3, minimal permissions (storage, alarms)
 - [x] No remote code / eval (verified)
 - [x] 96/96 tests pass
-- [ ] Host PRIVACY.md at a public URL — best: https://pycode.co.uk/vero-detect/privacy
-      (fallback: GitHub Pages repo). URL must open without login.
+- [x] Privacy policy LIVE: https://hacker007s.github.io/vero-detect/privacy.html
 - [ ] Bump manifest version for the store build (e.g. 2.0.0) + npm run zip
 - [ ] Screenshots: 3-5 at 1280x800 (verdict panel on a real listing, deep
       check, options page). PNG/JPG, no rounded corners.
