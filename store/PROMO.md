@@ -56,17 +56,29 @@ If you have any confusion you can ask me.
 
 ---
 
-## 2. Short message (groups, status, quick send)
+## 2. Short message (recommended for the main send)
 
 *VeRO Detect is live on the Chrome Web Store* 🎉
 
-One VeRO complaint can cost you your eBay account, and it is usually a brand you never knew was protected.
+One VeRO complaint can pull your listing, and a few of them can pull your account. Usually it is a brand you never knew was protected.
 
-VeRO Detect checks it for you before you list. Open any product on eBay, Amazon or AliExpress and you get an instant verdict in the corner of your screen, clear, caution, or do not list. It covers 1,100+ VeRO brands refreshed weekly, UK restricted items, trademark mentions, size and weight for postage, and dropship fit.
+VeRO Detect tells you before you list, not after.
 
-Everything runs in your browser. No account, no sign up, nothing collected.
+Open any product on eBay, Amazon or AliExpress and a badge appears in the corner with a straight verdict:
+
+✅ CLEAR
+⚠️ CAUTION
+❌ DO NOT LIST
+
+It checks 1,100+ VeRO brands refreshed weekly from eBay's own list, UK restricted items, trademark mentions in the title, size and weight for your real postage cost, and dropship fit.
+
+Everything runs inside your browser. No account, no sign up, nothing collected.
 
 👉 https://chromewebstore.google.com/detail/kindbjoneleeodgpkfkgpileajllhbom
+
+Add to Chrome, open a product page, the badge does the rest. Nothing to set up.
+
+It checks known rules only, so use it as your first filter and keep your own judgement on top.
 
 This is free from our side. I hope this will save your time and help you in decisions.
 
