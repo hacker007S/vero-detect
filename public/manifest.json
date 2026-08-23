@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "VeRO Detect",
-  "version": "2.0.0",
+  "name": "VeRO Detect \u2013 Brand & Restricted Item Checker",
+  "short_name": "VeRO Detect",
+  "version": "2.1.0",
   "description": "Checks AliExpress, eBay and Amazon products against eBay VeRO and UK restricted-item rules before you list them.",
   "permissions": [
     "storage",

@@ -1,7 +1,7 @@
 # Chrome Web Store listing — VeRO Detect
 
 ## Name
-VeRO Detect — eBay VeRO & Restricted Item Checker
+VeRO Detect – Brand & Restricted Item Checker
 
 ## Summary (132 chars max)
 Check any eBay, Amazon or AliExpress listing against eBay VeRO brands and UK restricted-item rules before you list it. Free.
@@ -31,6 +31,10 @@ Everything runs inside your browser. No server, no tracking, no sign-up.
 
 By Pycode Ltd — makers of seller tools for eBay dropshippers.
 Support: zahoor@pycode.co.uk
+
+VeRO Detect is an independent tool. It is not affiliated with, endorsed by
+or sponsored by eBay Inc., Amazon.com Inc. or Alibaba Group. All trademarks
+are the property of their respective owners.
 
 ## Category
 Tools (or: Shopping)
